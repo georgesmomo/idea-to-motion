@@ -1,0 +1,41 @@
+<template>
+  <div id="root" data-composition-id="s4" data-width="1920" data-height="1080">
+    <div class="mo-scene" id="s4-scene">
+      <div class="mo-bg" id="s4-bg"></div>
+      <div class="mo-stage" id="s4-stage">
+        <div class="mo-camera" id="s4-cam">
+          <div id="s4-pot" style="position:absolute;left:760px;top:170px;width:400px;height:400px;font-size:400px"><span class="mo-icon" data-icon="emoji-honey-pot"></span></div>
+          <div class="mo-icon" data-icon="emoji-microbe" id="s4-m1" style="position:absolute;left:470px;top:180px;font-size:150px"></div>
+          <div class="mo-icon" data-icon="emoji-microbe" id="s4-m2" style="position:absolute;left:1300px;top:150px;font-size:120px"></div>
+          <div class="mo-icon" data-icon="emoji-microbe" id="s4-m3" style="position:absolute;left:420px;top:460px;font-size:110px"></div>
+          <div class="mo-icon" data-icon="emoji-microbe" id="s4-m4" style="position:absolute;left:1340px;top:440px;font-size:160px"></div>
+          <div class="mo-center" style="top:640px"><h2 class="mo-title" id="s4-t">Bacteria <span id="s4-x">can't survive.</span></h2></div>
+          <div id="s4-cap" class="mo-caption"></div>
+        </div>
+      </div>
+      <div class="mo-grain"></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 5;
+      const tl = gsap.timeline({ paused: true });
+      MO.icons();
+      const ms = ["#s4-m1", "#s4-m2", "#s4-m3", "#s4-m4"];
+      MO.drift(tl, "#s4-bg", 0, D);
+      MO.enter(tl, "#s4-stage", 0);
+      MO.reveal(tl, "#s4-pot", 0.05, { kind: "pop" });
+      MO.reveal(tl, ms, 0.25, { kind: "pop", stagger: 0.12 });
+      MO.float(tl, ms, 0.6, 1.6, { amp: 26, rot: 30, seed: 4 });
+      MO.reveal(tl, "#s4-t", 0.4);
+      const k = MO.snap("s4", 2.2);
+      MO.glitch(tl, ms, k);
+      MO.hide(tl, ms, k + 0.18, { kind: "shrink", stagger: 0.06 });
+      MO.pulse(tl, "#s4-pot", k + 0.25);
+      MO.scribble(tl, "#s4-x", k + 0.5, { kind: "underline", color: "--accent" });
+      if (window.MO_VO && MO_VO.s4) MO.captions(tl, "#s4-cap", MO_VO.s4);
+      MO.exit(tl, "#s4-stage", D);
+      window.__timelines["s4"] = tl;
+    })();
+  </script>
+</template>

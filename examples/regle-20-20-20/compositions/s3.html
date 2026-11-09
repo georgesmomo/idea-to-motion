@@ -1,0 +1,32 @@
+<template>
+  <div id="root" data-composition-id="s3" data-width="1080" data-height="1920">
+    <div class="mo-scene" id="s3-scene">
+      <div class="mo-bg" id="s3-bg"></div>
+      <div class="mo-stage" id="s3-stage">
+        <div class="mo-camera" id="s3-cam">
+          <div class="mo-mid" style="gap:100px;align-items:flex-start;text-align:left;padding-left:20px">
+            <div class="mo-row" id="s3-r1" style="gap:34px"><span class="mo-icon mo-accent" data-icon="timer" style="font-size:150px"></span><span class="mo-title" style="font-size:118px;line-height:0.95">Toutes les<br><span class="mo-accent">20 min</span></span></div>
+            <div class="mo-row" id="s3-r2" style="gap:34px"><span class="mo-icon mo-accent" data-icon="eye" style="font-size:150px"></span><span class="mo-title" style="font-size:118px;line-height:0.95">Regarde<br>à <span class="mo-accent">6 m</span></span></div>
+            <div class="mo-row" id="s3-r3" style="gap:34px"><span class="mo-icon mo-accent" data-icon="hourglass" style="font-size:150px"></span><span class="mo-title" style="font-size:118px;line-height:0.95">Pendant<br><span class="mo-accent">20 s</span></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="mo-grain"></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 5.714;
+      const tl = gsap.timeline({ paused: true });
+      MO.icons();
+      MO.drift(tl, "#s3-bg", 0, D);
+      MO.shapes(tl, "#s3-scene", 0, D, { n: 5, seed: 23, area: { x: 40, y: 40, w: 1000, h: 190 }, size: [40, 110] });
+      MO.shapes(tl, "#s3-scene", 0, D, { n: 6, seed: 23 + 7, area: { x: 40, y: 1420, w: 1000, h: 440 }, size: [50, 150] });
+      MO.reveal(tl, "#s3-r1", 0.05, { kind: "left" });
+      MO.reveal(tl, "#s3-r2", MO.atWord("s3", "regarde", { fallback: 1.9 }) - 0.1, { kind: "left" });
+      MO.reveal(tl, "#s3-r3", MO.atWord("s3", "pendant", { fallback: 3.4 }) - 0.1, { kind: "left" });
+      MO.draw(tl, "#s3-r3 .mo-icon", MO.atWord("s3", "pendant", { fallback: 3.4 }), { fill: "now" });
+      window.__timelines["s3"] = tl;
+    })();
+  </script>
+</template>

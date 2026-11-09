@@ -1,0 +1,34 @@
+<template>
+  <div id="root" data-composition-id="s1" data-width="1080" data-height="1920">
+    <div class="mo-scene" id="s1-scene">
+      <div class="mo-bg" id="s1-bg"></div>
+      <div class="mo-stage" id="s1-stage">
+        <div class="mo-camera" id="s1-cam">
+          <div class="mo-mid" style="gap:30px">
+            <div id="s1-eyes" style="font-size:300px;line-height:1"><span class="mo-icon" data-icon="emoji-eyes"></span></div>
+            <div id="s1-k">
+              <span class="mo-mega" style="font-size:180px">Tes yeux</span>
+              <span class="mo-mega" style="font-size:230px">sont</span>
+              <span class="mo-mega mo-accent" style="font-size:172px">fatigués&nbsp;?</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mo-grain"></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 3.81;
+      const tl = gsap.timeline({ paused: true });
+      MO.icons();
+      MO.drift(tl, "#s1-bg", 0, D);
+      MO.shapes(tl, "#s1-scene", 0, D, { n: 5, seed: 3, area: { x: 40, y: 40, w: 1000, h: 190 }, size: [40, 110] });
+      MO.shapes(tl, "#s1-scene", 0, D, { n: 6, seed: 3 + 7, area: { x: 40, y: 1420, w: 1000, h: 440 }, size: [50, 150] });
+      MO.reveal(tl, "#s1-eyes", 0, { kind: "settle" });
+      MO.punch(tl, "#s1-k", 0, { beat: MO.beat() * 2 });
+      MO.pulse(tl, "#s1-eyes", MO.snap("s1", 2.5));
+      window.__timelines["s1"] = tl;
+    })();
+  </script>
+</template>

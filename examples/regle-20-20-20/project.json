@@ -1,0 +1,17 @@
+{
+  "title": "regle-20-20-20",
+  "ratio": "9:16",
+  "style": "kinetic",
+  "lang": "fr",
+  "fps": 30,
+  "sound": "auto",
+  "music": { "mood": "energetic", "volume": 0.8 },
+  "voice": { "voice": "ff_siwis", "speed": 1 },
+  "captions": false,
+  "scenes": [
+    { "id": "s1", "duration": 3.81, "beat": "hook: tired eyes?", "vo": "Tes yeux sont fatigués ?", "voAt": 0.2 },
+    { "id": "s2", "duration": 3.81, "beat": "the 20-20-20 rule", "vo": "Essaie la règle 20-20-20.", "say": "Essaie la règle vingt, vingt, vingt.", "voAt": 0.15, "hit": true },
+    { "id": "s3", "duration": 5.714, "beat": "how: 20 min, 6 m, 20 s", "vo": "Toutes les 20 minutes, regarde à 6 mètres pendant 20 secondes.", "say": "Toutes les vingt minutes, regarde à six mètres, pendant vingt secondes.", "voAt": 0.15 },
+    { "id": "s4", "duration": 3.81, "beat": "payoff", "vo": "Tes yeux te disent merci.", "voAt": 0.2 }
+  ]
+}

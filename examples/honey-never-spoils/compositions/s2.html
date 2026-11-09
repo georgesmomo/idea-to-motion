@@ -1,0 +1,36 @@
+<template>
+  <div id="root" data-composition-id="s2" data-width="1920" data-height="1080">
+    <div class="mo-scene" id="s2-scene">
+      <div class="mo-bg" id="s2-bg"></div>
+      <div class="mo-stage" id="s2-stage">
+        <div class="mo-camera" id="s2-cam">
+          <div class="mo-safe mo-row" style="top:130px;height:660px;justify-content:center;gap:110px">
+            <div id="s2-pyr" style="width:420px;height:420px;font-size:420px;color:var(--accent-2)"><span class="mo-icon" data-icon="tabler-pyramid"></span></div>
+            <div class="mo-col" style="gap:26px;align-items:flex-start">
+              <h2 class="mo-title" id="s2-t">Found in<br>Egyptian tombs.</h2>
+              <span class="mo-btn" id="s2-ok" style="font-size:var(--fs-title)">Still edible.</span>
+            </div>
+          </div>
+          <div id="s2-cap" class="mo-caption"></div>
+        </div>
+      </div>
+      <div class="mo-grain"></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 5;
+      const tl = gsap.timeline({ paused: true });
+      MO.icons();
+      MO.drift(tl, "#s2-bg", 0, D);
+      MO.enter(tl, "#s2-stage", 0);
+      MO.draw(tl, "#s2-pyr", 0.05, { dur: 1.1 });
+      MO.reveal(tl, "#s2-t", 0.05);
+      MO.reveal(tl, "#s2-ok", MO.snap("s2", 1.9), { kind: "stamp" });
+      MO.breathe(tl, "#s2-pyr", 1.4, D - 1.4);
+      if (window.MO_VO && MO_VO.s2) MO.captions(tl, "#s2-cap", MO_VO.s2);
+      MO.exit(tl, "#s2-stage", D);
+      window.__timelines["s2"] = tl;
+    })();
+  </script>
+</template>

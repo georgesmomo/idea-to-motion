@@ -1,0 +1,18 @@
+{
+  "title": "honey-never-spoils",
+  "ratio": "16:9",
+  "style": "paper",
+  "lang": "en",
+  "fps": 30,
+  "sound": "auto",
+  "music": { "mood": "warm", "volume": 0.8 },
+  "voice": { "voice": "af_heart", "speed": 1 },
+  "brand": { "accent": "#A65F00", "accent2": "#264653", "onAccent": "#1E1A14" },
+  "scenes": [
+    { "id": "s1", "duration": 5, "beat": "hook: 3,000-year-old honey", "vo": "This honey is three thousand years old.", "voAt": 0.4 },
+    { "id": "s2", "duration": 5, "beat": "found in Egyptian tombs, still edible", "vo": "Found in Egyptian tombs. Still edible.", "voAt": 0.3 },
+    { "id": "s3", "duration": 7.5, "beat": "three reasons", "vo": "Why? Very little water. High acidity. And a natural antiseptic, made by the bees.", "voAt": 0.3, "hit": true },
+    { "id": "s4", "duration": 5, "beat": "bacteria can't survive", "vo": "Bacteria simply can't survive in it.", "voAt": 0.3 },
+    { "id": "s5", "duration": 5, "beat": "keep the lid on", "vo": "Keep the lid on, and it lasts for centuries.", "voAt": 0.3 }
+  ]
+}

@@ -1,0 +1,35 @@
+<template>
+  <div id="root" data-composition-id="s1" data-width="1080" data-height="1080">
+    <div class="mo-scene" id="s1-scene">
+      <div class="mo-bg" id="s1-bg"></div>
+      <div class="mo-stage" id="s1-stage">
+        <div class="mo-camera" id="s1-cam">
+          <div class="mo-mid" style="gap:40px">
+            <div class="mo-kicker" id="s1-k">Style · kinetic</div>
+            <h1 class="mo-hook" id="s1-q" style="font-size:calc(var(--fs-hook) * 1.12)">
+              <span class="mo-line-mask"><span><span class="mo-mark" id="s1-done">Done</span> is</span></span>
+              <span class="mo-line-mask"><span>better than</span></span>
+              <span class="mo-line-mask"><span id="s1-perfect">perfect.</span></span>
+            </h1>
+            <div class="mo-body mo-muted" id="s1-by">— every shipped project</div>
+          </div>
+        </div>
+      </div>
+      <div class="mo-grain"></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 6.5;
+      const tl = gsap.timeline({ paused: true });
+      MO.drift(tl, "#s1-bg", 0, D);
+      MO.reveal(tl, "#s1-k", 0);
+      let t = MO.lines(tl, "#s1-q", 0);
+      MO.mark(tl, "#s1-done", MO.snap("s1", t + 0.2));
+      t = MO.scribble(tl, "#s1-perfect", MO.snap("s1", t + 1.0), { kind: "strike", color: "--accent-2" });
+      MO.reveal(tl, "#s1-by", t + 0.3, { kind: "fade" });
+      MO.breathe(tl, "#s1-q", 1.5, D - 1.5);
+      window.__timelines["s1"] = tl;
+    })();
+  </script>
+</template>

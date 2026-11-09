@@ -1,0 +1,51 @@
+<template>
+  <div id="root" data-composition-id="s3" data-width="1920" data-height="1080">
+    <div class="mo-scene" id="s3-scene">
+      <div class="mo-bg" id="s3-bg"></div>
+      <div class="mo-stage" id="s3-stage">
+        <div class="mo-camera" id="s3-cam">
+          <div class="mo-center" style="top:96px"><h2 class="mo-title" id="s3-t">Why it never spoils</h2></div>
+          <div class="mo-safe mo-row" style="top:270px;justify-content:center;gap:48px">
+            <div class="mo-card mo-col" id="s3-c1" style="position:relative;width:470px;align-items:center;text-align:center;gap:6px">
+              <span class="mo-icon" data-icon="emoji-droplet" style="font-size:120px"></span>
+              <span class="mo-stat mo-accent" style="font-size:124px;white-space:nowrap"><span id="s3-n1">17</span>%</span>
+              <span class="mo-body">water. Too dry for germs.</span>
+            </div>
+            <div class="mo-card mo-col" id="s3-c2" style="position:relative;width:470px;align-items:center;text-align:center;gap:6px">
+              <span class="mo-icon" data-icon="emoji-lemon" style="font-size:120px"></span>
+              <span class="mo-stat mo-accent" style="font-size:124px;white-space:nowrap">pH 3.9</span>
+              <span class="mo-body">acidic, like lemonade.</span>
+            </div>
+            <div class="mo-card mo-col" id="s3-c3" style="position:relative;width:470px;align-items:center;text-align:center;gap:6px">
+              <span class="mo-icon" data-icon="emoji-honeybee" style="font-size:120px"></span>
+              <span class="mo-stat mo-accent" style="font-size:124px;white-space:nowrap">H₂O₂</span>
+              <span class="mo-body">an antiseptic, made by bees.</span>
+            </div>
+          </div>
+          <div id="s3-cap" class="mo-caption"></div>
+        </div>
+      </div>
+      <div class="mo-grain"></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 7.5;
+      const tl = gsap.timeline({ paused: true });
+      MO.icons();
+      MO.drift(tl, "#s3-bg", 0, D);
+      MO.enter(tl, "#s3-stage", 0);
+      MO.reveal(tl, "#s3-t", 0.05, { kind: "rise" });
+      // Each card lands when the voice names it.
+      const t1 = MO.atWord("s3", "water", { fallback: 1.2 }) - 0.15, t2 = MO.atWord("s3", "acidity", { fallback: 2.5 }) - 0.15, t3 = MO.atWord("s3", "antiseptic", { fallback: 3.8 }) - 0.15;
+      MO.reveal(tl, "#s3-c1", t1, { kind: "drop" });
+      MO.count(tl, "#s3-n1", 0, 17, t1 + 0.1, { dur: 0.9 });
+      MO.reveal(tl, "#s3-c2", t2, { kind: "drop" });
+      MO.reveal(tl, "#s3-c3", t3, { kind: "drop" });
+      MO.focus(tl, "#s3-c3", ["#s3-c1", "#s3-c2", "#s3-c3"], t3 + 1.0, { dim: 0.45 });
+      if (window.MO_VO && MO_VO.s3) MO.captions(tl, "#s3-cap", MO_VO.s3);
+      MO.exit(tl, "#s3-stage", D);
+      window.__timelines["s3"] = tl;
+    })();
+  </script>
+</template>

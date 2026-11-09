@@ -1,0 +1,43 @@
+<template>
+  <div id="root" data-composition-id="s1" data-width="1920" data-height="1080">
+    <div class="mo-scene" id="s1-scene">
+      <div class="mo-bg" id="s1-bg"></div>
+      <div class="mo-stage" id="s1-stage">
+        <div class="mo-camera" id="s1-cam">
+          <div class="mo-safe mo-row" style="top:150px;height:640px;justify-content:center;gap:90px">
+            <div id="s1-pot" style="width:440px;height:440px;font-size:440px"><span class="mo-icon" data-icon="emoji-honey-pot"></span></div>
+            <div class="mo-col" style="gap:10px">
+              <div class="mo-kicker" id="s1-k">Found in a tomb</div>
+              <h1 class="mo-hook" id="s1-h1">This honey is</h1>
+              <div class="mo-row" style="gap:28px;align-items:baseline">
+                <span class="mo-stat mo-accent" id="s1-n">3,000</span>
+                <span class="mo-title" id="s1-y">years old.</span>
+              </div>
+            </div>
+          </div>
+          <div id="s1-cap" class="mo-caption"></div>
+        </div>
+      </div>
+      <div class="mo-grain"></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 5;
+      const tl = gsap.timeline({ paused: true });
+      MO.icons();
+      MO.drift(tl, "#s1-bg", 0, D);
+      // Frame 0 is the thumbnail: the whole hook is readable immediately, and settles.
+      MO.reveal(tl, ["#s1-k", "#s1-h1", "#s1-n", "#s1-y"], 0, { kind: "settle", stagger: 0 });
+      MO.reveal(tl, "#s1-pot", 0, { kind: "settle" });
+      const t = MO.atWord("s1", "three", { fallback: 0.8 });
+      MO.pulse(tl, "#s1-n", t);
+      MO.scribble(tl, "#s1-n", MO.atWord("s1", "old", { fallback: 2.2 }), { kind: "circle", color: "--accent-2" });
+      MO.pulse(tl, "#s1-pot", MO.snap("s1", 2.5));
+      MO.float(tl, "#s1-pot", 1.0, D - 1.0, { amp: 10, rot: 4 });
+      if (window.MO_VO && MO_VO.s1) MO.captions(tl, "#s1-cap", MO_VO.s1);
+      MO.exit(tl, "#s1-stage", D);
+      window.__timelines["s1"] = tl;
+    })();
+  </script>
+</template>

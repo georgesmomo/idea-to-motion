@@ -1,0 +1,36 @@
+<template>
+  <div id="root" data-composition-id="s4" data-width="1080" data-height="1920">
+    <div class="mo-scene" id="s4-scene">
+      <div class="mo-bg" id="s4-bg"></div>
+      <div class="mo-stage" id="s4-stage">
+        <div class="mo-camera" id="s4-cam">
+          <div class="mo-mid" style="gap:40px">
+            <div id="s4-eyes" style="font-size:260px;line-height:1"><span class="mo-icon" data-icon="emoji-eyes"></span></div>
+            <h1 class="mo-hook" id="s4-t" style="font-size:150px">
+              <span class="mo-line-mask"><span>Tes yeux</span></span>
+              <span class="mo-line-mask"><span>te disent</span></span>
+              <span class="mo-line-mask"><span class="mo-accent">merci.</span></span>
+            </h1>
+            <div class="mo-small" id="s4-src" style="max-width:680px">Source : American Academy<br>of Ophthalmology</div>
+          </div>
+        </div>
+      </div>
+      <div class="mo-grain"></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 3.81;
+      const tl = gsap.timeline({ paused: true });
+      MO.icons();
+      MO.drift(tl, "#s4-bg", 0, D);
+      MO.shapes(tl, "#s4-scene", 0, D, { n: 5, seed: 37, area: { x: 40, y: 40, w: 1000, h: 190 }, size: [40, 110] });
+      MO.shapes(tl, "#s4-scene", 0, D, { n: 6, seed: 37 + 7, area: { x: 40, y: 1420, w: 1000, h: 440 }, size: [50, 150] });
+      MO.reveal(tl, "#s4-eyes", 0, { kind: "pop" });
+      const t = MO.lines(tl, "#s4-t", 0.05);
+      MO.reveal(tl, "#s4-src", t + 0.2, { kind: "fade" });
+      MO.breathe(tl, "#s4-t", t, D - t);
+      window.__timelines["s4"] = tl;
+    })();
+  </script>
+</template>

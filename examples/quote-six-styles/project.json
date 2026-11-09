@@ -1,0 +1,20 @@
+{
+  "title": "quote-kinetic",
+  "ratio": "1:1",
+  "style": "kinetic",
+  "lang": "en",
+  "fps": 30,
+  "sound": "auto",
+  "music": {
+    "mood": "energetic",
+    "volume": 0.8
+  },
+  "voice": null,
+  "scenes": [
+    {
+      "id": "s1",
+      "duration": 6.5,
+      "beat": "quote"
+    }
+  ]
+}

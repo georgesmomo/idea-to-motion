@@ -1,0 +1,381 @@
+/* idea-to-motion kit: styles and building blocks.
+   `motion sync` inlines the base part plus ONLY the chosen style block into index.html (the
+   HyperFrames compiler embeds only the fonts it can see in the HTML).
+   Body attributes: data-style="STYLE_NAME", data-ratio="16x9|9x16|1x1|4x5".
+   Each style sets colours, fonts, shape language, texture AND motion character
+   (--mo-speed, --mo-ease-in, --mo-overshoot...), which the kit's helpers read. */
+
+/* ---------- type scale and safe areas per ratio (px at render size) ---------- */
+:root {
+  --safe-l: 96px; --safe-r: 96px; --safe-t: 64px; --safe-b: 120px;
+  --fs-mega: 260px; --fs-hook: 132px; --fs-title: 80px; --fs-quote: 92px; --fs-body: 42px; --fs-label: 36px;
+  --fs-sub: 30px; --fs-small: 34px; --fs-kicker: 32px; --fs-code: 32px; --fs-stat: 200px; --fs-url: 46px; --fs-caption: 50px;
+}
+[data-ratio="9x16"] {
+  --safe-l: 100px; --safe-r: 100px; --safe-t: 250px; --safe-b: 560px;
+  --fs-mega: 230px; --fs-hook: 116px; --fs-title: 86px; --fs-quote: 88px; --fs-body: 48px; --fs-label: 44px;
+  --fs-sub: 36px; --fs-small: 34px; --fs-kicker: 36px; --fs-code: 36px; --fs-stat: 210px; --fs-url: 48px; --fs-caption: 56px;
+}
+[data-ratio="1x1"] { --safe-l: 60px; --safe-r: 60px; --safe-t: 60px; --safe-b: 60px; }
+[data-ratio="4x5"] { --safe-l: 60px; --safe-r: 60px; --safe-t: 80px; --safe-b: 160px; }
+[data-ratio="1x1"], [data-ratio="4x5"] {
+  --fs-mega: 210px; --fs-hook: 104px; --fs-title: 72px; --fs-quote: 78px; --fs-body: 44px; --fs-label: 40px;
+  --fs-sub: 32px; --fs-small: 30px; --fs-kicker: 32px; --fs-code: 34px; --fs-stat: 180px; --fs-url: 44px; --fs-caption: 50px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* Defaults every style overrides. */
+:root {
+  --bg: #101114; --bg-2: #101114; --panel: #1A1C21; --line: #2A2D35; --text: #F2F2F2; --muted: #9AA0AA;
+  --accent: #5B8CFF; --accent-2: #FFB547; --accent-3: #3DDC97; --ok: #3DDC97; --err: #FF5C6C; --packet: var(--accent);
+  --on-accent: #0B0B0B;
+  --font-display: "Inter", sans-serif; --font-body: "Inter", sans-serif; --font-mono: "JetBrains Mono", monospace;
+  --display-weight: 800; --display-tracking: -0.02em; --display-case: none; --display-leading: 1.02;
+  --body-weight: 500; --radius: 18px; --border-w: 0px; --border-c: transparent;
+  --shadow: 0 18px 40px rgba(0,0,0,0.28); --glow: 0 0 0 transparent;
+  /* motion character */
+  --mo-speed: 1; --mo-ease-in: power3.out; --mo-ease-out: power2.in; --mo-overshoot: 1.6;
+  --mo-stagger: 0.08; --mo-step: 0; --mo-reveal: rise; --mo-enter: push; --mo-drift: 1;
+}
+
+html, body { overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font-body); font-weight: var(--body-weight); }
+
+/* ---------- scene structure ---------- */
+.mo-scene { position: absolute; inset: 0; background: var(--bg); overflow: hidden; }
+.mo-bg { position: absolute; inset: -140px; pointer-events: none; }
+.mo-stage { position: absolute; inset: 0; transform-origin: 50% 50%; }
+.mo-camera { position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform-origin: 0 0; }
+.mo-scene::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 50; background: var(--overlay, none); }
+/* Grain (seeded SVG noise, identical on every frame) */
+.mo-grain { position: absolute; inset: 0; pointer-events: none; z-index: 49; opacity: var(--grain, 0); mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 1.4 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E"); }
+
+/* Centred inside the platform safe area (on 9:16 the safe box is off-centre). */
+.mo-center { position: absolute; left: var(--safe-l); right: var(--safe-r); text-align: center; }
+.mo-safe { position: absolute; left: var(--safe-l); right: var(--safe-r); }
+.mo-fill { position: absolute; left: var(--safe-l); right: var(--safe-r); top: var(--safe-t); bottom: var(--safe-b); }
+.mo-row { display: flex; align-items: center; gap: 28px; }
+.mo-col { display: flex; flex-direction: column; gap: 22px; }
+.mo-mid { position: absolute; left: var(--safe-l); right: var(--safe-r); top: var(--safe-t); bottom: var(--safe-b);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 28px; }
+/* With a voice-over, sync sets data-captions on body: content stops above the caption band. */
+:root { --cap-zone: 0px; }
+body[data-captions] { --cap-zone: calc(var(--fs-caption) * 1.9 + 20px); }
+body[data-captions] .mo-mid, body[data-captions] .mo-fill { bottom: calc(var(--safe-b) + var(--cap-zone)); }
+/* Debug overlay drawn by `motion stills` (never in renders). */
+body[data-safe-overlay] .mo-scene::before { content: ""; position: absolute; z-index: 9999; pointer-events: none;
+  left: var(--safe-l); right: var(--safe-r); top: var(--safe-t); bottom: var(--safe-b); border: 3px dashed rgba(255, 43, 214, 0.85); }
+
+/* ---------- type ---------- */
+.mo-mega, .mo-hook, .mo-title, .mo-quote { font-family: var(--font-display); font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking); line-height: var(--display-leading); text-transform: var(--display-case); color: var(--text); }
+.mo-mega { font-size: var(--fs-mega); line-height: 0.92; }
+.mo-hook { font-size: var(--fs-hook); }
+.mo-title { font-size: var(--fs-title); }
+.mo-quote { font-size: var(--fs-quote); }
+.mo-kicker { font-family: var(--font-kicker, var(--font-mono)); font-size: var(--fs-kicker); font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--kicker-c, var(--accent)); }
+.mo-body { font-size: var(--fs-body); line-height: 1.3; color: var(--text); }
+.mo-small { font-size: var(--fs-small); color: var(--muted); }
+.mo-muted { color: var(--muted); } .mo-accent { color: var(--accent); } .mo-accent-2 { color: var(--accent-2); } .mo-accent-3 { color: var(--accent-3); }
+.mo-ok { color: var(--ok); } .mo-err { color: var(--err); }
+.mo-on-accent { color: var(--on-accent); } .mo-fill-accent { background: var(--accent); color: var(--on-accent); padding: 0 0.15em; }
+.mo-word, .mo-char { display: inline-block; white-space: pre; }
+.mo-line-mask { display: block; overflow: hidden; padding-bottom: 0.08em; }
+.mo-line-mask > span { display: inline-block; }
+/* Marker highlight drawn behind a word (MO.mark animates --mark from 0 to 1). */
+.mo-mark { --mark: 0; display: inline-block; padding: 0 0.08em; margin: 0 -0.08em; border-radius: 0.08em;
+  background: linear-gradient(var(--mark-c, var(--accent)), var(--mark-c, var(--accent))) no-repeat 0 50% / calc(var(--mark) * 100%) 100%; }
+.mo-swap { display: inline-grid; } .mo-swap > * { grid-area: 1 / 1; display: inline-block; }
+.mo-stat { font-family: var(--font-display); font-weight: var(--display-weight); font-size: var(--fs-stat);
+  letter-spacing: var(--display-tracking); line-height: 1; font-variant-numeric: tabular-nums; }
+.mo-caption { position: absolute; left: var(--safe-l); right: var(--safe-r); bottom: calc(var(--safe-b) + 10px); text-align: center; z-index: 60;
+  font-family: var(--font-body); font-weight: 800; font-size: var(--fs-caption); line-height: 1.15; color: #FFFFFF; }
+.mo-caption > div { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; }
+.mo-cap-pill { display: inline-block; padding: 0.14em 0.5em 0.18em; border-radius: 0.32em; background: rgba(12, 12, 14, 0.78); }
+
+/* ---------- blocks ---------- */
+.mo-card { position: relative; background: var(--panel); border: var(--border-w) solid var(--border-c); border-radius: var(--radius);
+  padding: 34px 40px; box-shadow: var(--shadow), var(--glow); }
+.mo-chip { display: inline-flex; align-items: center; gap: 14px; padding: 12px 26px; border-radius: 999px; background: var(--panel);
+  border: var(--border-w) solid var(--border-c); font-size: var(--fs-small); font-weight: 700; color: var(--text); }
+.mo-badge { display: inline-flex; align-items: center; gap: 12px; padding: 10px 22px; border-radius: 999px;
+  font-family: var(--font-mono); font-size: var(--fs-small); font-weight: 700; border: 3px solid currentColor; }
+.mo-btn { display: inline-flex; align-items: center; gap: 16px; padding: 26px 54px; border-radius: var(--btn-radius, 999px);
+  background: var(--accent); color: var(--on-accent); font-family: var(--font-body); font-size: var(--fs-label); font-weight: 800;
+  border: var(--border-w) solid var(--border-c); box-shadow: var(--shadow); }
+.mo-url { font-family: var(--font-mono); font-size: var(--fs-url); color: var(--accent); font-weight: 700; }
+.mo-icon { display: inline-block; width: 1em; height: 1em; color: var(--icon-c, var(--accent)); }
+.mo-icon svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.mo-icon-tile { display: inline-flex; align-items: center; justify-content: center; width: 168px; height: 168px; border-radius: var(--radius);
+  background: var(--panel); border: var(--border-w) solid var(--border-c); box-shadow: var(--shadow); font-size: 92px; }
+.mo-num { display: inline-flex; align-items: center; justify-content: center; width: 1.6em; height: 1.6em; border-radius: 50%;
+  background: var(--accent); color: var(--on-accent); font-family: var(--font-display); font-weight: var(--display-weight); }
+.mo-rule { height: 4px; background: var(--accent); transform-origin: 0 50%; }
+.mo-flash { position: absolute; inset: 0; background: var(--text); opacity: 0; pointer-events: none; z-index: 48; }
+.mo-shape { position: absolute; }
+.mo-dot { position: absolute; border-radius: 50%; }
+.mo-svg-layer { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+
+/* Device and window mockups (pure CSS, contents are your own markup) */
+.mo-phone { position: absolute; width: 520px; height: 1060px; border-radius: 84px; background: #0A0A0C; padding: 22px;
+  box-shadow: 0 40px 90px rgba(0,0,0,0.45), inset 0 0 0 3px #2A2A30; }
+.mo-phone > .mo-screen { width: 100%; height: 100%; border-radius: 64px; overflow: hidden; background: var(--panel); position: relative; }
+.mo-phone::before { content: ""; position: absolute; left: 50%; top: 40px; width: 150px; height: 42px; margin-left: -75px; border-radius: 30px; background: #0A0A0C; z-index: 3; }
+.mo-browser { position: absolute; border-radius: 22px; overflow: hidden; background: var(--panel); box-shadow: 0 40px 90px rgba(0,0,0,0.4);
+  border: var(--border-w) solid var(--border-c); }
+.mo-browser > .mo-bar { height: 64px; display: flex; align-items: center; gap: 12px; padding: 0 26px; background: color-mix(in srgb, var(--panel) 80%, var(--text) 8%); }
+.mo-browser > .mo-bar i { width: 18px; height: 18px; border-radius: 50%; background: var(--line); display: inline-block; }
+.mo-browser > .mo-bar span { margin-left: 18px; flex: 1; height: 36px; border-radius: 18px; background: color-mix(in srgb, var(--bg) 60%, transparent);
+  font-family: var(--font-mono); font-size: 22px; line-height: 36px; padding: 0 18px; color: var(--muted); }
+
+/* Charts (built by MO.bars / MO.line / MO.donut) */
+.mo-chart { position: absolute; }
+.mo-chart .mo-bar-fill { position: absolute; bottom: 0; border-radius: calc(var(--radius) * 0.5) calc(var(--radius) * 0.5) 0 0; background: var(--accent); transform-origin: 50% 100%; }
+.mo-chart .mo-bar-fill.mo-hi { background: var(--accent-2); }
+.mo-chart .mo-bar-val { position: absolute; width: 100%; text-align: center; font-family: var(--font-display); font-weight: var(--display-weight); font-size: var(--fs-label); font-variant-numeric: tabular-nums; }
+.mo-chart .mo-bar-lab { position: absolute; width: 100%; text-align: center; font-size: var(--fs-small); color: var(--muted); top: calc(100% + 14px); }
+.mo-chart .mo-axis { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--line); }
+.mo-chart svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.mo-chart .mo-line-path { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+.mo-chart .mo-line-area { fill: var(--accent); opacity: 0.16; }
+.mo-chart .mo-line-dot { fill: var(--bg); stroke: var(--accent); stroke-width: 6; }
+.mo-chart .mo-donut-track { fill: none; stroke: var(--line); }
+.mo-chart .mo-donut-arc { fill: none; stroke: var(--accent); stroke-linecap: round; }
+
+/* Diagram nodes (MO.diagram) */
+.mo-node { --state: var(--node-idle, var(--accent)); position: absolute; display: flex; align-items: center; gap: 18px; padding: 0 26px;
+  background: var(--panel); border: 3px solid var(--state); border-radius: var(--radius); box-shadow: var(--shadow), var(--glow); color: var(--text); }
+.mo-node .mo-node-icon { flex: 0 0 auto; width: 56px; height: 56px; color: var(--state); }
+.mo-node .mo-node-icon svg { width: 100%; height: 100%; display: block; }
+.mo-node .mo-label { font-size: var(--fs-label); font-weight: 700; line-height: 1.1; white-space: nowrap; }
+.mo-node .mo-sub { font-size: var(--fs-sub); color: var(--muted); margin-top: 4px; white-space: nowrap; }
+.mo-edges { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.mo-edge { fill: none; stroke: var(--muted); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.mo-edge-label { font-family: var(--font-mono); font-size: var(--fs-small); fill: var(--muted); }
+.mo-head { fill: var(--muted); }
+.mo-packet { fill: var(--packet); }
+
+/* Timeline (MO.timeline) */
+.mo-tl-track { position: absolute; height: 6px; background: var(--line); border-radius: 3px; }
+.mo-tl-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 3px; transform-origin: 0 50%; }
+.mo-tl-stop { position: absolute; transform: translateX(-50%); text-align: center; }
+.mo-tl-stop .mo-tl-dot { width: 34px; height: 34px; border-radius: 50%; background: var(--bg); border: 6px solid var(--accent); margin: 0 auto; }
+.mo-tl-stop .mo-tl-year { font-family: var(--font-display); font-weight: var(--display-weight); font-size: var(--fs-label); margin-top: 18px; }
+.mo-tl-stop .mo-tl-text { font-size: var(--fs-small); color: var(--muted); margin-top: 6px; width: 320px; margin-left: -160px; position: relative; left: 50%; }
+
+/* Terminal and code (tech topics) */
+.mo-term { position: absolute; background: #0B0F14; border: 2px solid #232B36; border-radius: 16px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.45); }
+.mo-term-bar { height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 22px; background: #151B23; }
+.mo-term-bar i { width: 16px; height: 16px; border-radius: 50%; background: #3A4350; display: inline-block; }
+.mo-term-bar i:nth-child(1) { background: #FF5F57; } .mo-term-bar i:nth-child(2) { background: #FEBC2E; } .mo-term-bar i:nth-child(3) { background: #28C840; }
+.mo-term-body { padding: 26px 30px; font-family: var(--font-mono); font-size: var(--fs-code); line-height: 1.45; color: #C9D1D9; }
+.mo-tline { white-space: pre; min-height: 1.45em; }
+.mo-prompt { color: #3FB950; }
+.mo-caret { display: inline-block; width: 0.55em; height: 1.05em; vertical-align: -0.15em; background: currentColor; margin-left: 2px; }
+
+/* =====================================================================================
+   STYLES. Each block starts with a literal font rule so the compiler embeds its fonts.
+   ===================================================================================== */
+
+/* @style swiss */
+.mo-fonts-swiss { font-family: "Archivo"; } .mo-fonts-swiss-b { font-family: "IBM Plex Mono"; }
+[data-style="swiss"] {
+  --bg: #F4F1EA; --bg-2: #ECE7DC; --panel: #FFFFFF; --line: #1111111F; --text: #111111; --muted: #5A5650;
+  --accent: #E63312; --accent-2: #111111; --accent-3: #1F5FBF; --ok: #1E7A46; --err: #E63312; --on-accent: #FFFFFF;
+  --font-display: "Archivo", sans-serif; --font-body: "Archivo", sans-serif; --font-mono: "IBM Plex Mono", monospace;
+  --display-weight: 900; --display-tracking: -0.04em; --display-leading: 0.95; --radius: 0px; --shadow: none;
+  --mo-speed: 0.9; --mo-ease-in: expo.out; --mo-overshoot: 0; --mo-stagger: 0.06; --mo-reveal: left; --mo-enter: push; --grain: 0.18;
+}
+[data-style="swiss"] .mo-bg { background:
+  linear-gradient(90deg, transparent calc(50% - 1px), #11111114 calc(50% - 1px), #11111114 calc(50% + 1px), transparent calc(50% + 1px)),
+  linear-gradient(#11111110 2px, transparent 2px) 0 0 / 100% 180px, var(--bg); }
+/* @end */
+
+/* @style flat */
+.mo-fonts-flat { font-family: "Plus Jakarta Sans"; } .mo-fonts-flat-b { font-family: "Inter"; } .mo-fonts-flat-c { font-family: "JetBrains Mono"; }
+[data-style="flat"] {
+  --bg: #F1FAEE; --bg-2: #E3F2FD; --panel: #FFFFFF; --line: #CFE0EA; --text: #0B2545; --muted: #4F6D8A;
+  --accent: #0B5FFF; --accent-2: #FFB703; --accent-3: #2EC4B6; --ok: #2EC4B6; --err: #EF476F; --on-accent: #FFFFFF;
+  --font-display: "Plus Jakarta Sans", sans-serif; --font-body: "Inter", sans-serif;
+  --display-weight: 800; --display-tracking: -0.03em; --radius: 28px; --shadow: 0 20px 50px rgba(11,37,69,0.12);
+  --mo-speed: 1; --mo-ease-in: back.out(1.4); --mo-overshoot: 1.4; --mo-stagger: 0.08; --mo-reveal: card; --mo-enter: push;
+}
+[data-style="flat"] .mo-bg { background:
+  radial-gradient(circle at 14% 22%, #FFB70333 0 220px, transparent 221px),
+  radial-gradient(circle at 88% 78%, #2EC4B633 0 300px, transparent 301px),
+  radial-gradient(circle at 80% 12%, #0B5FFF1A 0 140px, transparent 141px), var(--bg); }
+/* @end */
+
+/* @style kinetic */
+.mo-fonts-kinetic { font-family: "Anton"; } .mo-fonts-kinetic-b { font-family: "Inter"; } .mo-fonts-kinetic-c { font-family: "JetBrains Mono"; }
+[data-style="kinetic"] {
+  --bg: #0A0A0A; --bg-2: #141414; --panel: #1A1A1A; --line: #2B2B2B; --text: #FFFFFF; --muted: #A3A3A3;
+  --accent: #F5FF3D; --accent-2: #FF2E63; --accent-3: #FFFFFF; --ok: #F5FF3D; --err: #FF2E63; --on-accent: #0A0A0A;
+  --font-display: "Anton", sans-serif; --font-body: "Inter", sans-serif;
+  --display-weight: 400; --display-tracking: 0.005em; --display-case: uppercase; --display-leading: 0.92; --radius: 6px;
+  --mo-speed: 0.7; --mo-ease-in: power4.out; --mo-overshoot: 0; --mo-stagger: 0.05; --mo-reveal: slam; --mo-enter: cut; --grain: 0.35;
+}
+[data-style="kinetic"] .mo-bg { background: var(--bg); }
+/* @end */
+
+/* @style editorial */
+.mo-fonts-editorial { font-family: "DM Serif Display"; } .mo-fonts-editorial-b { font-family: "DM Sans"; } .mo-fonts-editorial-c { font-family: "IBM Plex Mono"; }
+[data-style="editorial"] {
+  --bg: #F6F1E7; --bg-2: #EFE7D8; --panel: #FFFDF8; --line: #D8CDB8; --text: #1B1B1B; --muted: #6A6155;
+  --accent: #B3392F; --accent-2: #1F4E79; --accent-3: #C98B2B; --ok: #2E6B45; --err: #B3392F; --on-accent: #FFFFFF;
+  --font-display: "DM Serif Display", serif; --font-body: "DM Sans", sans-serif; --font-mono: "IBM Plex Mono", monospace;
+  --display-weight: 400; --display-tracking: -0.01em; --display-leading: 1.0; --radius: 4px; --shadow: 0 10px 30px rgba(27,27,27,0.08);
+  --mo-speed: 1.35; --mo-ease-in: power2.inOut; --mo-overshoot: 0; --mo-stagger: 0.1; --mo-reveal: mask; --mo-enter: fade; --grain: 0.3;
+}
+[data-style="editorial"] .mo-bg { background: var(--bg); }
+/* @end */
+
+/* @style brutalist */
+.mo-fonts-brutalist { font-family: "Space Grotesk"; } .mo-fonts-brutalist-b { font-family: "Space Mono"; }
+[data-style="brutalist"] {
+  --bg: #FFF4D6; --bg-2: #FFE9A8; --panel: #FFFFFF; --line: #000000; --text: #000000; --muted: #3A3A3A;
+  --accent: #FF5C8A; --accent-2: #4D6BFE; --accent-3: #3DDC97; --ok: #3DDC97; --err: #FF3B30; --on-accent: #000000;
+  --font-display: "Space Grotesk", sans-serif; --font-body: "Space Grotesk", sans-serif; --font-mono: "Space Mono", monospace;
+  --display-weight: 700; --display-tracking: -0.035em; --display-leading: 0.95; --radius: 0px;
+  --border-w: 5px; --border-c: #000000; --shadow: 10px 10px 0 #000000; --btn-radius: 0px;
+  --mo-speed: 0.8; --mo-ease-in: back.out(2); --mo-overshoot: 2; --mo-stagger: 0.07; --mo-reveal: pop; --mo-enter: cut;
+  --kicker-c: #000000;
+}
+[data-style="brutalist"] .mo-bg { background: radial-gradient(#00000026 2.5px, transparent 3px) 0 0 / 34px 34px, var(--bg); }
+/* @end */
+
+/* @style synthwave */
+.mo-fonts-synthwave { font-family: "Audiowide"; } .mo-fonts-synthwave-b { font-family: "Rajdhani"; } .mo-fonts-synthwave-c { font-family: "Space Mono"; }
+[data-style="synthwave"] {
+  --bg: #0D0221; --bg-2: #2A0845; --panel: #1A0B38; --line: #3B1D6E; --text: #FDF1FF; --muted: #B9A3D9;
+  --accent: #FF2A6D; --accent-2: #05D9E8; --accent-3: #FFC857; --ok: #05D9E8; --err: #FF2A6D; --on-accent: #0D0221;
+  --font-display: "Audiowide", sans-serif; --font-body: "Rajdhani", sans-serif; --font-mono: "Space Mono", monospace;
+  --display-weight: 400; --display-tracking: 0.02em; --display-case: uppercase; --body-weight: 600; --radius: 10px;
+  --glow: 0 0 28px color-mix(in srgb, var(--accent) 55%, transparent);
+  --mo-speed: 1.2; --mo-ease-in: sine.out; --mo-overshoot: 0; --mo-stagger: 0.1; --mo-reveal: blur; --mo-enter: zoom;
+}
+[data-style="synthwave"] .mo-bg { background: linear-gradient(180deg, #0D0221 0%, #2A0845 52%, #FF2A6D55 58%, #0D0221 60%); }
+[data-style="synthwave"] .mo-bg::after { content: ""; position: absolute; left: -40%; right: -40%; top: 58%; height: 70%;
+  transform: perspective(500px) rotateX(62deg); transform-origin: 50% 0;
+  background: linear-gradient(#FF2A6DAA 2px, transparent 2px) 0 0 / 100% 60px, linear-gradient(90deg, #FF2A6DAA 2px, transparent 2px) 0 0 / 80px 100%; }
+[data-style="synthwave"] .mo-hook, [data-style="synthwave"] .mo-title, [data-style="synthwave"] .mo-mega { text-shadow: 0 0 24px #FF2A6D99, 0 0 2px #fff; }
+/* @end */
+
+/* @style iso */
+.mo-fonts-iso { font-family: "Outfit"; } .mo-fonts-iso-b { font-family: "DM Sans"; } .mo-fonts-iso-c { font-family: "JetBrains Mono"; }
+[data-style="iso"] {
+  --bg: #EAF0FF; --bg-2: #DCE5FF; --panel: #FFFFFF; --line: #C5D2F5; --text: #2B2D42; --muted: #5C6385;
+  --accent: #3B5BDB; --accent-2: #FF8FAB; --accent-3: #FFD166; --ok: #12B886; --err: #F03E3E; --on-accent: #FFFFFF;
+  --font-display: "Outfit", sans-serif; --font-body: "DM Sans", sans-serif;
+  --display-weight: 800; --display-tracking: -0.03em; --radius: 22px; --shadow: 0 24px 0 -6px #C5D2F5, 0 30px 60px rgba(43,45,66,0.14);
+  --mo-speed: 1.05; --mo-ease-in: power3.out; --mo-overshoot: 1.3; --mo-stagger: 0.1; --mo-reveal: drop; --mo-enter: push;
+}
+[data-style="iso"] .mo-bg { background: radial-gradient(#3B5BDB22 2px, transparent 2.5px) 0 0 / 46px 27px, linear-gradient(180deg, var(--bg), var(--bg-2)); }
+/* @end */
+
+/* @style paper */
+.mo-fonts-paper { font-family: "Fredoka"; } .mo-fonts-paper-b { font-family: "Nunito"; } .mo-fonts-paper-c { font-family: "IBM Plex Mono"; }
+[data-style="paper"] {
+  --bg: #F2E8CF; --bg-2: #E9DBB8; --panel: #FFF9EC; --line: #D9C9A3; --text: #264653; --muted: #5E6B6B;
+  --accent: #BC4749; --accent-2: #386641; --accent-3: #F4A261; --ok: #386641; --err: #BC4749; --on-accent: #FFF9EC;
+  --font-display: "Fredoka", sans-serif; --font-body: "Nunito", sans-serif; --font-mono: "IBM Plex Mono", monospace;
+  --display-weight: 700; --display-tracking: -0.01em; --radius: 26px; --body-weight: 600;
+  --shadow: 0 3px 0 #0000001A, 0 10px 18px #5A3E1A33;
+  --mo-speed: 1.1; --mo-ease-in: back.out(1.5); --mo-overshoot: 1.5; --mo-stagger: 0.09; --mo-reveal: drop; --mo-step: 12; --mo-enter: push; --grain: 0.45;
+}
+[data-style="paper"] .mo-bg { background: var(--bg); }
+/* @end */
+
+/* @style doodle */
+.mo-fonts-doodle { font-family: "Patrick Hand"; } .mo-fonts-doodle-b { font-family: "Nunito"; } .mo-fonts-doodle-c { font-family: "Kalam"; }
+[data-style="doodle"] {
+  --bg: #FFFDF5; --bg-2: #FFF6DA; --panel: #FFFFFF; --line: #22222233; --text: #222222; --muted: #5B5B5B;
+  --accent: #FF6B6B; --accent-2: #4D96FF; --accent-3: #FFD93D; --ok: #6BCB77; --err: #FF6B6B; --on-accent: #222222;
+  --font-display: "Patrick Hand", cursive; --font-body: "Nunito", sans-serif; --font-mono: "Kalam", cursive; --font-kicker: "Kalam", cursive;
+  --display-weight: 400; --display-tracking: 0; --display-leading: 1.05; --radius: 18px; --body-weight: 700;
+  --border-w: 4px; --border-c: #222222; --shadow: 6px 7px 0 #22222222;
+  --mo-speed: 1; --mo-ease-in: back.out(1.6); --mo-overshoot: 1.6; --mo-stagger: 0.09; --mo-reveal: pop; --mo-step: 12; --mo-enter: push;
+  --kicker-c: #C83737;
+}
+[data-style="doodle"] .mo-bg { background: linear-gradient(#4D96FF1A 2px, transparent 2px) 0 0 / 100% 64px, var(--bg); }
+[data-style="doodle"] .mo-card, [data-style="doodle"] .mo-chip, [data-style="doodle"] .mo-btn, [data-style="doodle"] .mo-icon-tile { border-radius: 255px 18px 225px 18px / 18px 225px 18px 255px; }
+/* @end */
+
+/* @style luxury */
+.mo-fonts-luxury { font-family: "Cormorant Garamond"; } .mo-fonts-luxury-b { font-family: "Montserrat"; }
+[data-style="luxury"] {
+  --bg: #0E0D0B; --bg-2: #17140F; --panel: #17140F; --line: #3A3226; --text: #EDE6D6; --muted: #A89C85;
+  --accent: #C9A96E; --accent-2: #EDE6D6; --accent-3: #8C7A55; --ok: #C9A96E; --err: #C0392B; --on-accent: #0E0D0B;
+  --font-display: "Cormorant Garamond", serif; --font-body: "Montserrat", sans-serif; --font-mono: "Montserrat", sans-serif;
+  --display-weight: 500; --display-tracking: 0.01em; --display-leading: 1.0; --body-weight: 400; --radius: 0px;
+  --shadow: none; --btn-radius: 0px;
+  --mo-speed: 1.6; --mo-ease-in: power2.inOut; --mo-overshoot: 0; --mo-stagger: 0.14; --mo-reveal: blur; --mo-enter: fade; --mo-drift: 0.5; --grain: 0.12;
+  --overlay: radial-gradient(ellipse at 50% 45%, transparent 50%, #000000AA 100%);
+}
+[data-style="luxury"] .mo-kicker { letter-spacing: 0.4em; font-weight: 500; }
+[data-style="luxury"] .mo-bg { background: radial-gradient(ellipse at 50% 40%, #221D15 0%, var(--bg) 60%); }
+/* @end */
+
+/* @style glass */
+.mo-fonts-glass { font-family: "Sora"; } .mo-fonts-glass-b { font-family: "Manrope"; } .mo-fonts-glass-c { font-family: "JetBrains Mono"; }
+[data-style="glass"] {
+  --bg: #C9B8F0; --bg-2: #FBC2EB; --panel: rgba(255,255,255,0.42); --line: rgba(255,255,255,0.6); --text: #1D1D2B; --muted: #4B4B66;
+  --accent: #6C47FF; --accent-2: #FF5FA2; --accent-3: #00B8D9; --ok: #12B886; --err: #F03E3E; --on-accent: #FFFFFF;
+  --font-display: "Sora", sans-serif; --font-body: "Manrope", sans-serif;
+  --display-weight: 700; --display-tracking: -0.035em; --radius: 34px; --body-weight: 600;
+  --border-w: 2px; --border-c: rgba(255,255,255,0.75); --shadow: 0 30px 60px rgba(60,30,120,0.18);
+  --mo-speed: 1.1; --mo-ease-in: power3.out; --mo-overshoot: 1.2; --mo-stagger: 0.09; --mo-reveal: blur; --mo-enter: zoom;
+}
+[data-style="glass"] .mo-bg { background:
+  radial-gradient(circle at 20% 25%, #FF9AD5 0 260px, transparent 520px),
+  radial-gradient(circle at 82% 70%, #8EC5FF 0 300px, transparent 600px),
+  linear-gradient(135deg, #A18CD1, #FBC2EB); }
+[data-style="glass"] .mo-card, [data-style="glass"] .mo-chip, [data-style="glass"] .mo-icon-tile, [data-style="glass"] .mo-node { backdrop-filter: blur(24px); }
+/* @end */
+
+/* @style darktech */
+.mo-fonts-darktech { font-family: "Space Grotesk"; } .mo-fonts-darktech-b { font-family: "JetBrains Mono"; }
+[data-style="darktech"] {
+  --bg: #0B0F14; --bg-2: #0F1620; --panel: #121A24; --line: #1E2A38; --text: #E6EDF3; --muted: #8B98A8;
+  --accent: #00E5A0; --accent-2: #7C5CFF; --accent-3: #36C5F0; --ok: #00E5A0; --err: #FF5470; --on-accent: #0B0F14;
+  --font-display: "Space Grotesk", sans-serif; --font-body: "Space Grotesk", sans-serif; --font-mono: "JetBrains Mono", monospace;
+  --display-weight: 700; --display-tracking: -0.035em; --radius: 16px;
+  --glow: 0 0 30px color-mix(in srgb, var(--accent) 22%, transparent);
+  --mo-speed: 0.9; --mo-ease-in: expo.out; --mo-overshoot: 0; --mo-stagger: 0.07; --mo-reveal: rise; --mo-enter: whip;
+  --overlay: radial-gradient(ellipse at 50% 45%, transparent 55%, #000000B0 100%);
+}
+[data-style="darktech"] .mo-bg { background:
+  linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 48px 48px, linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 48px 48px,
+  radial-gradient(ellipse at 50% 30%, #13202D, var(--bg) 70%); opacity: 0.9; }
+/* @end */
+
+/* @style blueprint */
+.mo-fonts-blueprint { font-family: "Inter"; } .mo-fonts-blueprint-b { font-family: "IBM Plex Mono"; }
+[data-style="blueprint"] {
+  --bg: #0B1B2E; --bg-2: #0F2238; --panel: #112640; --line: #1E3A5F; --text: #E6EDF7; --muted: #8BA3C0;
+  --accent: #4FC3F7; --accent-2: #FFB547; --accent-3: #3DDC97; --ok: #3DDC97; --err: #FF5C6C; --on-accent: #0B1B2E;
+  --font-display: "Inter", sans-serif; --font-body: "Inter", sans-serif; --font-mono: "IBM Plex Mono", monospace;
+  --display-weight: 900; --display-tracking: -0.03em; --radius: 14px;
+  --mo-speed: 1; --mo-ease-in: power3.out; --mo-overshoot: 1.7; --mo-stagger: 0.08; --mo-reveal: rise; --mo-enter: whip;
+  --overlay: radial-gradient(ellipse at 50% 45%, transparent 55%, #050D18CC 100%);
+}
+[data-style="blueprint"] .mo-bg { opacity: 0.5; background:
+  linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 40px 40px, linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 40px 40px, var(--bg); }
+/* @end */
+
+/* @style pastel */
+.mo-fonts-pastel { font-family: "Baloo 2"; } .mo-fonts-pastel-b { font-family: "Nunito"; }
+[data-style="pastel"] {
+  --bg: #FFF1F5; --bg-2: #EAF6FF; --panel: #FFFFFF; --line: #F3D3DE; --text: #3D2C4E; --muted: #7A6A8C;
+  --accent: #FF7AA8; --accent-2: #7BC6FF; --accent-3: #FFD86B; --ok: #5DD39E; --err: #FF6B6B; --on-accent: #FFFFFF;
+  --font-display: "Baloo 2", sans-serif; --font-body: "Nunito", sans-serif; --font-mono: "Nunito", sans-serif;
+  --display-weight: 800; --display-tracking: -0.01em; --radius: 40px; --body-weight: 700; --shadow: 0 18px 40px rgba(255,122,168,0.18);
+  --mo-speed: 1; --mo-ease-in: back.out(1.8); --mo-overshoot: 1.8; --mo-stagger: 0.08; --mo-reveal: pop; --mo-enter: push;
+  --kicker-c: #B81F55;
+}
+[data-style="pastel"] .mo-bg { background:
+  radial-gradient(circle at 12% 80%, #FFD86B44 0 180px, transparent 181px), radial-gradient(circle at 90% 18%, #7BC6FF44 0 240px, transparent 241px),
+  linear-gradient(160deg, var(--bg), var(--bg-2)); }
+/* @end */
