@@ -14,72 +14,63 @@ Any topic: a product launch, a birthday, a science fact, a quote, an event, your
 </p>
 
 <p align="center">
-  <a href="assets/sizzle.mp4"><img src="assets/sizzle.gif" width="880" alt="Showreel: a 3D Earth, the Sun, a spiral galaxy, a glass speaker orb with a cube transition, an extruded chrome AURA logo, a French Reel with 3D emoji and neon numbers"></a><br>
-  <sub><b>Made entirely by AI agents with this skill</b>: no video editor, no stock footage, no image generator. 3D, transitions, music, sound effects and voice, all rendered locally, no API key. <a href="assets/sizzle.mp4">▶ Watch with sound</a></sub>
+  <img src="assets/sizzle.gif" width="880" alt="Showreel: a 3D Earth, the Sun, a spiral galaxy, a glass speaker orb with a cube transition, an extruded chrome AURA logo, a French Reel with 3D emoji and neon numbers"><br>
+  <sub><b>Made entirely by AI agents with this skill</b>: no video editor, no stock footage, no image generator. 3D, transitions, music, sound effects and voice, all rendered locally, no API key. <b>Press play on the films below (sound on).</b></sub>
 </p>
 
-## Three films, three one-line prompts
+## The showreel (sound on)
 
-<table>
-<tr>
-<td width="50%" valign="top">
-<a href="assets/demo-universe.mp4"><img src="assets/poster-universe.jpg" alt="The universe in 40 seconds: a 3D spiral galaxy with a you-are-here pin"></a>
-<p><b>The universe in 40 seconds</b> · 16:9 · <a href="assets/demo-universe.mp4">▶ watch</a></p>
+https://github.com/user-attachments/assets/ff0efe82-d710-40fd-a3be-fa134350524c
+
+## The universe in 40 seconds
 
 ```text
-/idea-to-motion 40-second explainer: from "you are here"
-to the edge of the observable universe, one continuous
-pull-back, 3D, documentary voice-over
+/idea-to-motion 40-second explainer: from "you are here" to the edge of the observable universe,
+                one continuous pull-back, 3D, documentary voice-over
 ```
-<sub>Procedural 3D Earth, Moon, Sun, solar system, a 52,000-star galaxy and the cosmic web; a camera that never stops pulling back; numbers counting on the word the voice says them. <a href="examples/universe-in-40-seconds">Project files</a></sub>
-</td>
-<td width="50%" valign="top">
-<a href="assets/demo-aura.mp4"><img src="assets/poster-aura.jpg" alt="AURA launch film: extruded chrome 3D logo"></a>
-<p><b>AURA launch film</b> · 16:9 · <a href="assets/demo-aura.mp4">▶ watch</a></p>
+
+https://github.com/user-attachments/assets/9be14847-9370-47bb-9f0e-73bf7f1c15cf
+
+Procedural 3D Earth, Moon, Sun, solar system, a 52,000-star galaxy and the cosmic web, with no image files; a camera that never stops pulling back; numbers counting on the word the voice says them; facts with sources. [Project files](examples/universe-in-40-seconds)
+
+## AURA: a product launch film
 
 ```text
-/idea-to-motion 30-second launch film for AURA, a smart
-speaker shaped like a glass orb. Keynote feel, 3D, dark
-stage, male voice-over. CTA: pre-order at aura.example
+/idea-to-motion 30-second launch film for AURA, a smart speaker shaped like a glass orb.
+                Keynote feel, 3D, dark stage, male voice-over. CTA: pre-order at aura.example
 ```
-<sub>Glass orb with a light core, cube and deck transitions, a beat-synced montage, an extruded chrome logo, motion blur. Fictional product. <a href="examples/aura-launch">Project files</a></sub>
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top" align="center">
-<a href="assets/demo-cerveau.mp4"><img src="assets/poster-cerveau.jpg" width="260" alt="French Reel: Ton cerveau en 5 chiffres, a 3D brain"></a>
-<p><b>Ton cerveau en 5 chiffres</b> · 9:16 Reel in French · <a href="assets/demo-cerveau.mp4">▶ watch</a></p>
-</td>
-<td width="50%" valign="top">
+
+https://github.com/user-attachments/assets/3c8a7350-aa9d-4ab6-a800-2d3ff7da92e3
+
+A glass orb with a light core, cube and deck transitions, a beat-synced montage, an extruded chrome logo, motion blur. AURA is a fictional product. [Project files](examples/aura-launch)
+
+## A French Reel: « Ton cerveau en 5 chiffres » (9:16)
 
 ```text
-/idea-to-motion Reel de 30 s en français :
-"Ton cerveau en 5 chiffres", voix off, énergique,
-en 3D, transitions qui claquent
+/idea-to-motion Reel de 30 s en français : "Ton cerveau en 5 chiffres", voix off, énergique,
+                en 3D, transitions qui claquent
 ```
-<sub>Noto emoji extruded into 3D objects, 3D numbers flipping in letter by letter, a neuron sphere, six kinds of transitions on the beat, French voice-over, facts checked with sources. <a href="examples/cerveau-5-chiffres">Project files</a></sub>
 
-</td>
-</tr>
-</table>
+https://github.com/user-attachments/assets/a9980191-ec32-4d27-aa4d-d84a5b5b2eda
+
+Emoji turned into 3D objects, 3D numbers flipping in letter by letter, a neuron sphere, six kinds of transitions on the beat, a French voice-over, facts checked with sources. [Project files](examples/cerveau-5-chiffres)
+
+## More examples
 
 <details>
-<summary><b>More examples</b>: one quote in six styles, an explainer with captions, a kinetic French Reel</summary>
+<summary><b>One quote in six styles · an explainer with captions · a kinetic French Reel</b></summary>
 
-<p align="center">
-  <a href="assets/styles-reel.mp4"><img src="assets/styles.gif" width="760" alt="The same quote animated in six styles: kinetic, editorial, luxury, brutalist, synthwave, doodle"></a><br>
-  <sub>One prompt, six styles. <a href="assets/styles-reel.mp4">▶ Watch with sound</a> (each style composes its own music) · <a href="examples/quote-six-styles">project files</a></sub>
-</p>
+**One prompt, six styles** (each style composes its own music) · [project files](examples/quote-six-styles)
 
-<p align="center">
-  <a href="assets/demo-honey.mp4"><img src="assets/demo-honey.gif" width="640" alt="Explainer video: a 3,000-year-old honey pot, three reasons as cards, voice-over captions"></a><br>
-  <sub><code>/idea-to-motion 30-second explainer: why honey never spoils, with a voice-over</code> · <a href="assets/demo-honey.mp4">▶ watch</a> · <a href="examples/honey-never-spoils">project files</a></sub>
-</p>
+https://github.com/user-attachments/assets/43893de3-a810-40fb-8b1f-8b05e6abf9f3
 
-<p align="center">
-  <a href="assets/demo-reel-fr.mp4"><img src="assets/demo-reel-fr.gif" width="240" alt="Vertical Reel in French: kinetic words on the beat, the 20-20-20 rule"></a><br>
-  <sub><code>/idea-to-motion Reels de 15-20 s en français sur la règle 20-20-20 pour les yeux, style énergique, avec voix off</code> · <a href="assets/demo-reel-fr.mp4">▶ watch</a> · <a href="examples/regle-20-20-20">project files</a></sub>
-</p>
+**`/idea-to-motion 30-second explainer: why honey never spoils, with a voice-over`** · [project files](examples/honey-never-spoils)
+
+https://github.com/user-attachments/assets/2d6f6909-f40c-4e2c-9e10-346df8a14295
+
+**`/idea-to-motion Reels de 15-20 s en français sur la règle 20-20-20 pour les yeux, style énergique, avec voix off`** · [project files](examples/regle-20-20-20)
+
+https://github.com/user-attachments/assets/4de31673-4c92-4fe6-bf11-087ef56358cc
 
 </details>
 

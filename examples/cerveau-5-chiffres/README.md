@@ -2,7 +2,9 @@
 
 **Prompt:** `/idea-to-motion Reel de 30 s en français : "Ton cerveau en 5 chiffres", voix off, énergique, en 3D, transitions qui claquent`
 
-Complete brief, so no questions. Result: [assets/demo-cerveau.mp4](../../assets/demo-cerveau.mp4)
+https://github.com/user-attachments/assets/a9980191-ec32-4d27-aa4d-d84a5b5b2eda
+
+Complete brief, so no questions. Result: the video above
 (29.1 s, 1080x1920, darktech style with a neon brand override, energetic 126 bpm, French voice `ff_siwis`, motion blur on).
 
 What it shows:

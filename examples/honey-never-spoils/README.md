@@ -2,8 +2,10 @@
 
 **Prompt:** `/idea-to-motion 30-second explainer: why honey never spoils, with a voice-over`
 
+https://github.com/user-attachments/assets/2d6f6909-f40c-4e2c-9e10-346df8a14295
+
 The brief passed both intake gates (the subject is the message; facts come from research), so
-the skill generated directly: no questions. Result: [assets/demo-honey.mp4](../../assets/demo-honey.mp4)
+the skill generated directly: no questions. Result: the video above
 (27.5 s, 16:9, paper style, warm music, voice-over with captions, −14 LUFS).
 
 What it shows:

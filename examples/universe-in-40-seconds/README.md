@@ -2,8 +2,10 @@
 
 **Prompt:** `/idea-to-motion 40-second explainer: from "you are here" to the edge of the observable universe, one continuous pull-back, 3D, documentary voice-over`
 
+https://github.com/user-attachments/assets/9be14847-9370-47bb-9f0e-73bf7f1c15cf
+
 The brief passed both intake gates, so the skill generated directly: no questions. Result:
-[assets/demo-universe.mp4](../../assets/demo-universe.mp4) (40.6 s, 16:9, darktech style with
+the video above (40.6 s, 16:9, darktech style with
 a cinematic brand override, epic music, British documentary voice, −14 LUFS).
 
 What it shows:

@@ -2,11 +2,13 @@
 
 **Prompt:** `/idea-to-motion 30-second launch film for AURA, a smart speaker shaped like a glass orb. Keynote feel, 3D, dark stage, male voice-over. CTA: pre-order at aura.example`
 
+https://github.com/user-attachments/assets/3c8a7350-aa9d-4ab6-a800-2d3ff7da92e3
+
 > **AURA is a fictional product** invented for this showcase. Every spec on screen (360°,
 > 20 h, "listens only when you ask") is a placeholder, listed as such in `facts.md`.
 > `aura.example` is a reserved example domain.
 
-Result: [assets/demo-aura.mp4](../../assets/demo-aura.mp4) (33.5 s, 16:9, darktech style with a lavender/aqua brand
+Result: the video above (33.5 s, 16:9, darktech style with a lavender/aqua brand
 override, energetic music, `am_michael` voice-over, −14 LUFS).
 
 What it shows:

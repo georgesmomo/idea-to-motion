@@ -2,7 +2,9 @@
 
 **Prompt:** `/idea-to-motion Reels de 15-20 s en français sur la règle 20-20-20 pour les yeux, style énergique, avec voix off`
 
-Complete brief, so no questions. Result: [assets/demo-reel-fr.mp4](../../assets/demo-reel-fr.mp4)
+https://github.com/user-attachments/assets/4de31673-4c92-4fe6-bf11-087ef56358cc
+
+Complete brief, so no questions. Result: the video above
 (17.1 s, 1080x1920, kinetic style, energetic 126 bpm, French voice `ff_siwis`).
 
 What it shows:
