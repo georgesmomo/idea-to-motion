@@ -1,0 +1,54 @@
+<template>
+  <div id="root" data-composition-id="s2" data-width="1920" data-height="1080">
+    <div class="mo-scene" id="s2-scene">
+      <div class="mo-gl-host" id="s2-gl"></div>
+      <div class="mo-stage" id="s2-stage">
+        <div class="mo-center" style="top:96px"><div class="mo-kicker" id="s2-k" style="color:var(--accent-2)">Introducing AURA</div></div>
+        <div class="mo-center" style="bottom:140px;top:auto"><div class="mo-title" id="s2-t" style="font-weight:300">A speaker made of <span style="font-weight:700;color:var(--accent)">light.</span></div></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 6.67;
+      const tl = gsap.timeline({ paused: true });
+      // AURA orb: clear glass shell, a small violet light core with a fresnel halo, a teal swirl of light inside.
+      function auraOrb(st, R, o) {
+        o = o || {};
+        const T = st.T, g = new T.Group();
+        st.root.add(g);
+        MO3D.shape(st, "sphere", { size: R, mat: "glass", parent: g });
+        const cc = o.core || "#7C3AED";
+        const core = MO3D.shape(st, "sphere", { size: R * 0.26, mat: "neon", color: cc, glow: 0.9, parent: g });
+        MO3D.glow(st, core, { color: cc, size: 1.55, intensity: 0.7, power: 2.6 });
+        // Transparent layers inside the glass are drawn over it (transmission only sees opaque objects).
+        core.children.forEach((h) => { h.material.depthTest = false; h.renderOrder = 5; });
+        const swirl = new T.Group(); swirl.rotation.x = 0.55; g.add(swirl);
+        const sw = MO3D.particles(st, "galaxy", { count: 3000, radius: R * 0.8, colors: [cc, o.swirl || "--accent-2"], size: 2.2, arms: 2, twist: 2.2, parent: swirl });
+        sw.material.depthTest = false; sw.renderOrder = 6;
+        return { g, core, swirl };
+      }
+      MO.enter(tl, "#s2-scene", 0, "blur");
+      const st = MO3D.stage(tl, "#s2-gl", { D, cam: [0, 0.5, 7.2], look: [0, 0.15, 0], bg: "--bg", bloom: 0.5, bloomThreshold: 0.82, floor: { y: -1.5, opacity: 0.55 }, rim: "--accent-2" });
+      const T = st.T;
+      MO3D.particles(st, "stars", { count: 1800, colors: ["#ffffff", "--accent"] });
+      const dust = MO3D.particles(st, "field", { count: 700, radius: 6, colors: ["--accent", "--accent-2"], size: 3, opacity: 0.7 });
+      MO3D.spin(tl, dust, 0, { y: -0.12, dur: D });
+      // The orb: a glass shell, a glowing organic core, a halo ring.
+      const A = auraOrb(st, 1.25), orb = A.g, core = A.core;
+      const halo = MO3D.shape(st, "ring", { size: 1.75, mat: "neon", color: "--accent-2", glow: 0.6, parent: orb });
+      halo.rotation.x = 1.25;
+      MO3D.move(tl, orb, 0.15, { from: { y: -3.2 }, to: { y: 0 }, dur: 1.6, ease: "expo.out" });
+      MO3D.pop(tl, halo, 1.1, { turn: 0 });
+      MO3D.spin(tl, A.swirl, 0, { y: 0.9, dur: D });
+      const b = MO.beat();
+      tl.fromTo(core.scale, { x: 1, y: 1, z: 1 }, { x: 1.14, y: 1.14, z: 1.14, duration: b, ease: "sine.inOut", yoyo: true, repeat: Math.floor((D - 0.2 - MO.snap("s2", 1.4)) / b) - 1, immediateRender: false }, MO.snap("s2", 1.4));
+      tl.to(halo.rotation, { z: Math.PI * 0.8, duration: D, ease: "none" }, 0);
+      MO3D.orbit(tl, st, 0, { radius: 7.2, height: 0.5, from: -40, to: 35, dur: D, ease: "power1.inOut" });
+      MO.reveal(tl, "#s2-k", MO.atWord("s2", "Aura", { fallback: 1.2 }) - 0.1, { kind: "blur" });
+      MO.reveal(tl, "#s2-t", MO.atWord("s2", "speaker", { fallback: 2.4 }) - 0.15, { kind: "blur" });
+      MO.exit(tl, "#s2-scene", D, "cube", { overlap: true });
+      window.__timelines["s2"] = tl;
+    })();
+  </script>
+</template>

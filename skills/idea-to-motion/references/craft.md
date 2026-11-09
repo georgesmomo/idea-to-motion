@@ -109,12 +109,17 @@ illustration, a chart, a mockup, a giant number or word.
 
 One family per video plus dive/zoom. A transition is ≤ 10 % of its scene.
 
-## Light 3D and depth
+## 3D and depth
 
-CSS 3D, sparingly (≤ 20 % of the video): an isometric stack (`perspective: 1600px` on a
-wrapper, `rotateX(55deg) rotateZ(-45deg)` on the layer), cards with a slight `rotateY`
-settling to 0°, `MO.parallax` layers, `MO.push` slow push-ins. Never text on a plane tilted
-more than 25°.
+- Real 3D (MO3D, kit.md): a product, a logo, a planet, a 3D emoji or a number as the hero of
+  the hook, the reveal or the end card. One hero object per scene; the camera does the moving
+  (a slow dolly or orbit while the viewer reads, one dive or pull-back per scene).
+- Chain worlds with overlap transitions: `deep` to fly in, `back` to pull out, `cube` or `deck`
+  between sections, `blur` for emotional beats. 3–5 kinds per film, each with a reason.
+- A match cut is the strongest transition: end scene N on a framing and start N+1 on the same
+  framing (same object, same size), then keep moving.
+- CSS 3D still works for flat things: cards with a slight `rotateY` settling to 0°, `MO.parallax`
+  layers. Never text on a plane tilted more than 25°; product UI is never tilted.
 
 ## What makes motion look cheap (avoid all)
 

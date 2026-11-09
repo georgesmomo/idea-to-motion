@@ -555,12 +555,46 @@
     const el = need(qa(target), "count", target)[0];
     const dec = o.decimals || 0, sep = o.sep != null ? o.sep : ",";
     const fmt = (v) => { const s = v.toFixed(dec).split("."); s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, sep); return (o.prefix || "") + s.join(o.point || ".") + (o.suffix || ""); };
+    // A smaller unit after the number: { suffix: " km", suffixClass: "mo-title" } keeps it in one element.
+    if (o.suffixClass && o.suffix) {
+      const unit = document.createElement("span");
+      unit.className = o.suffixClass; unit.textContent = o.suffix;
+      const num = document.createElement("span");
+      el.textContent = ""; el.appendChild(num); el.appendChild(unit);
+      const o2 = Object.assign({}, o, { suffix: "", suffixClass: null });
+      return count(tl, num, from, to, at, o2);
+    }
     const p = { v: from };
     // Reserve the final width (tabular digits) so the layout never jumps while counting.
     el.style.fontVariantNumeric = "tabular-nums";
     if (getComputedStyle(el).display === "inline") el.style.display = "inline-block";
     el.style.minWidth = fmt(to).length * 0.92 + "ch";
     el.textContent = fmt(from);
+    // Once the real font is laid out, reserve exactly the final width (the ch estimate is only a
+    // fallback: wide or proportional digits would leave a gap or a jump).
+    // Reserve exactly the final width once the real font is there (the ch estimate is only a
+    // fallback: wide or proportional digits would leave a gap or a jump). The probe is measured
+    // in <body> with the element's font, so it works while the scene is not displayed yet.
+    // reserve: false skips it (count between numbers of the same digit count: tabular digits keep
+    // the width constant anyway).
+    let sized = o.reserve === false;
+    if (sized) el.style.minWidth = "";
+    const measure = () => {
+      if (sized) return;
+      const cs = getComputedStyle(el);
+      if (!cs.fontFamily || !cs.fontSize) return;
+      const probe = document.createElement("span");
+      ["fontFamily", "fontWeight", "fontStyle", "fontSize", "letterSpacing", "fontVariantNumeric", "fontFeatureSettings", "textTransform"].forEach((k) => { probe.style[k] = cs[k]; });
+      probe.style.cssText += ";position:absolute;left:-9999px;top:0;visibility:hidden;white-space:nowrap";
+      probe.textContent = fmt(to);
+      document.body.appendChild(probe);
+      const w = probe.getBoundingClientRect().width;
+      probe.remove();
+      if (w > 0) { el.style.minWidth = Math.ceil(w) + "px"; sized = !document.fonts || document.fonts.status === "loaded"; }
+    };
+    measure();
+    onFrame(tl, measure);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
     const dur = o.dur || D(1.2);
     tl.fromTo(p, { v: from }, { v: to, duration: dur, ease: o.ease || "power2.out", onUpdate: () => { el.textContent = fmt(p.v); } }, at);
     const ticks = Math.min(10, Math.round(dur * 8));
@@ -903,6 +937,17 @@
     rise:  [{ yPercent: 12, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.45, ease: EASE.in }],
     iris:  [{ clipPath: "circle(0% at 50% 50%)" }, { clipPath: "circle(75% at 50% 50%)", duration: 0.6, ease: "power3.inOut" }],
     wipe:  [{ clipPath: "inset(0% 0% 0% 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.55, ease: "power3.inOut" }],
+    // 3D and blended kinds: give the two scenes an "overlap" (project.json) equal to the duration and
+    // put enter/exit on the whole .mo-scene, so both faces are on screen together.
+    // cube / cubeUp turn around the cube's centre, half a frame behind the screen (origin set in enter/exit).
+    cube:   [{ rotationY: 90, transformPerspective: 2600 }, { rotationY: 0, duration: 0.8, ease: "power3.inOut" }],
+    cubeUp: [{ rotationX: -90, transformPerspective: 2600 }, { rotationX: 0, duration: 0.8, ease: "power3.inOut" }],
+    deck:   [{ xPercent: 70, z: -900, rotationY: -28, opacity: 0, transformPerspective: 2000 }, { xPercent: 0, z: 0, rotationY: 0, opacity: 1, duration: 0.8, ease: "expo.out" }],
+    flip:   [{ rotationY: -90, transformPerspective: 2000 }, { rotationY: 0, duration: 0.35, ease: "power3.out" }],
+    blur:   [{ opacity: 0, scale: 1.06, filter: "blur(24px)" }, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.6, ease: "power2.inOut" }],
+    spin:   [{ rotation: -12, scale: 1.5, opacity: 0, filter: "blur(16px)" }, { rotation: 0, scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.55, ease: "expo.out" }],
+    deep:   [{ scale: 0.35, opacity: 0, filter: "blur(14px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "expo.out" }],
+    back:   [{ scale: 2.4, opacity: 0, filter: "blur(16px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.8, ease: "expo.out" }],
     cut:   null,
   };
   const EXIT = {
@@ -913,6 +958,14 @@
     fade:  { opacity: 0, duration: 0.45, ease: "power1.inOut" },
     drop:  { yPercent: 10, opacity: 0, duration: 0.35, ease: EASE.out },
     iris:  { clipPath: "circle(0% at 50% 50%)", duration: 0.5, ease: "power3.in" },
+    cube:   { rotationY: -90, transformPerspective: 2600, duration: 0.8, ease: "power3.inOut" },
+    cubeUp: { rotationX: 90, transformPerspective: 2600, duration: 0.8, ease: "power3.inOut" },
+    deck:   { xPercent: -45, z: -900, rotationY: 28, opacity: 0, transformPerspective: 2000, duration: 0.7, ease: "power3.in" },
+    flip:   { rotationY: 90, transformPerspective: 2000, duration: 0.3, ease: "power3.in" },
+    blur:   { opacity: 0, scale: 0.97, filter: "blur(24px)", duration: 0.6, ease: "power2.inOut" },
+    spin:   { rotation: 10, scale: 0.6, opacity: 0, filter: "blur(16px)", duration: 0.45, ease: "power3.in" },
+    deep:   { scale: 3.2, opacity: 0, filter: "blur(18px)", duration: 0.6, ease: "power3.in" },
+    back:   { scale: 0.4, opacity: 0, filter: "blur(12px)", duration: 0.7, ease: "power3.in" },
     cut:   null,
   };
   /** Scene entrance at `at` (usually 0). kind defaults to the style's (--mo-enter). */
@@ -920,9 +973,9 @@
     kind = kind || style().enter;
     const k = ENTER[kind];
     if (!k) return at;
-    const loud = kind === "whip" || kind === "push" || kind === "up";
+    const loud = ["whip", "push", "up", "cube", "cubeUp", "deck", "spin", "deep", "back"].indexOf(kind) >= 0;
     cue(o, Math.max(0, at - 0.06), "whoosh", { dur: 0.45, gain: loud ? -2 : -8 });
-    tl.fromTo(q(stage), Object.assign({}, k[0]), Object.assign({}, k[1]), at);
+    tl.fromTo(q(stage), Object.assign(cubeOrigin(stage, kind), k[0]), Object.assign({}, k[1]), at);
     return at + k[1].duration;
   }
   /** Scene exit ending exactly at `end` (pass the scene duration). Pair kinds with the next enter. */
@@ -930,9 +983,16 @@
     kind = kind || style().enter;
     const k = EXIT[kind] || EXIT[{ wipe: "push", rise: "fade" }[kind]];
     if (!k) return end;
-    cue(o, end - k.duration - 0.05, "whoosh", { dur: k.duration + 0.15, gain: kind === "whip" ? 0 : -4 });
-    tl.to(q(stage), Object.assign({}, k), end - k.duration);
+    // With an overlap the next scene's enter already makes the whoosh.
+    if (!(o && o.overlap)) cue(o, end - k.duration - 0.05, "whoosh", { dur: k.duration + 0.15, gain: kind === "whip" ? 0 : -4 });
+    tl.to(q(stage), Object.assign(cubeOrigin(stage, kind), k), end - k.duration);
     return end;
+  }
+  function cubeOrigin(stage, kind) {
+    if (kind !== "cube" && kind !== "cubeUp") return {};
+    const host = q(stage).closest("[data-width]");
+    const W = host ? +host.getAttribute("data-width") : 1920, H = host ? +host.getAttribute("data-height") : 1080;
+    return { transformOrigin: `50% 50% ${-(kind === "cube" ? W : H) / 2}px` };
   }
   /** Colour panel wipe across the frame, covering the cut at `end` (put it at the end of scene N with
    *  { half: "in" } and at the start of scene N+1 with { half: "out" }, same colour). */
@@ -1221,6 +1281,6 @@
     reveal, hide, words, chars, lines, punch, scramble, mark, scribble, type, stream, captions,
     atWord, shapes, pulse, breathe, float, focus, unfocus, glitch, fail, ok, swap, highlight, count, flash, shine, drift,
     icon, icons, draw, morph, along, confetti, burst, bars, lineChart, ring, timeline,
-    enter, exit, panel, zoom, dive, home, push, parallax, diagram, packet,
+    enter, exit, panel, zoom, dive, home, push, parallax, diagram, packet, onFrame,
   };
 })(window);

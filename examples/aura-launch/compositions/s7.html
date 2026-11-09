@@ -1,0 +1,30 @@
+<template>
+  <div id="root" data-composition-id="s7" data-width="1920" data-height="1080">
+    <div class="mo-scene" id="s7-scene">
+      <div class="mo-gl-host" id="s7-gl"></div>
+      <div class="mo-stage" id="s7-stage">
+        <div class="mo-center" style="top:790px"><div class="mo-title" id="s7-t" style="font-weight:300;letter-spacing:-0.02em">Sound, without the <span style="font-weight:700;color:var(--accent)">box.</span></div></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 5.71;
+      const tl = gsap.timeline({ paused: true });
+      MO.enter(tl, "#s7-scene", 0, "back");
+      const st = MO3D.stage(tl, "#s7-gl", { D, cam: [-2.6, 1.4, 10.5], look: [0, 0.6, 0], bg: "--bg", bloom: 0.45, bloomThreshold: 0.85, floor: { y: -0.45, opacity: 0.6 }, rim: "--accent-2", key: "#ffffff" });
+      MO3D.particles(st, "stars", { count: 1500, colors: ["#ffffff", "--accent"] });
+      const word = MO3D.text(st, "AURA", { size: 2.0, mat: "chrome", letters: true, tracking: 0.08 });
+      word.position.y = 0.75;
+      MO3D.letters(tl, word, 0.25, { stagger: 0.12, dur: 1.0 });
+      // A glow line sweeps behind the logo.
+      const bar = MO3D.shape(st, "capsule", { size: 0.06, h: 60, mat: "neon", color: "--accent-2", glow: 3 });
+      bar.rotation.z = Math.PI / 2; bar.position.set(-14, 0.75, -2.5);
+      MO3D.move(tl, bar, MO.snap("s7", 1.9), { to: { x: 14 }, dur: 1.4, ease: "power2.inOut" });
+      MO3D.cam(tl, st, 0.1, { pos: [1.2, 0.9, 8.6], dur: D - 0.1, ease: "power2.out" });
+      MO.reveal(tl, "#s7-t", MO.snap("s7", 2.4), { kind: "blur" });
+      MO.exit(tl, "#s7-scene", D, "blur", { overlap: true });
+      window.__timelines["s7"] = tl;
+    })();
+  </script>
+</template>

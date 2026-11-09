@@ -1,0 +1,89 @@
+{
+  "title": "aura-launch",
+  "ratio": "16:9",
+  "style": "darktech",
+  "lang": "en",
+  "fps": 30,
+  "sound": "auto",
+  "motionBlur": true,
+  "music": {
+    "mood": "energetic",
+    "volume": 0.8
+  },
+  "voice": {
+    "voice": "am_michael",
+    "speed": 1
+  },
+  "captions": false,
+  "brand": {
+    "accent": "#A78BFA",
+    "accent2": "#5EEAD4",
+    "accent3": "#F0ABFC",
+    "onAccent": "#07060C",
+    "bg": "#07060C",
+    "text": "#F4F2FF",
+    "displayFont": "Sora",
+    "bodyFont": "Manrope"
+  },
+  "scenes": [
+    {
+      "id": "s1",
+      "duration": 3.81,
+      "beat": "hook: sound without the box",
+      "vo": "Sound. Without the box.",
+      "voAt": 0.3
+    },
+    {
+      "id": "s2",
+      "duration": 6.67,
+      "beat": "reveal: the orb rises, camera orbit",
+      "vo": "Meet Aura. A speaker made of light.",
+      "voAt": 0.9,
+      "overlap": 0.6,
+      "hit": true
+    },
+    {
+      "id": "s3",
+      "duration": 4.76,
+      "beat": "feature 1: 360 spatial sound, rings",
+      "vo": "Three hundred sixty degrees of sound.",
+      "voAt": 0.6,
+      "overlap": 0.8
+    },
+    {
+      "id": "s4",
+      "duration": 4.76,
+      "beat": "feature 2: listens only when you ask",
+      "vo": "It listens only when you ask.",
+      "voAt": 0.6,
+      "overlap": 0.7
+    },
+    {
+      "id": "s5",
+      "duration": 4.76,
+      "beat": "feature 3: 20 hours battery",
+      "vo": "Twenty hours on a single charge.",
+      "voAt": 0.4
+    },
+    {
+      "id": "s6",
+      "duration": 1.905,
+      "beat": "beat montage: 4 cuts of the orb, recap words"
+    },
+    {
+      "id": "s7",
+      "duration": 5.71,
+      "beat": "3D logo AURA",
+      "vo": "Aura.",
+      "voAt": 1.4
+    },
+    {
+      "id": "s8",
+      "duration": 3.81,
+      "beat": "end card CTA",
+      "vo": "Pre-order today.",
+      "voAt": 0.5,
+      "overlap": 0.6
+    }
+  ]
+}

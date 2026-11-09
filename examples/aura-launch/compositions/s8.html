@@ -1,0 +1,51 @@
+<template>
+  <div id="root" data-composition-id="s8" data-width="1920" data-height="1080">
+    <div class="mo-scene" id="s8-scene">
+      <div class="mo-gl-host" id="s8-gl"></div>
+      <div class="mo-stage" id="s8-stage">
+        <div class="mo-center" style="top:580px">
+          <div class="mo-btn" id="s8-btn" style="font-size:72px;padding:34px 104px">Pre-order</div>
+          <div class="mo-url" id="s8-url" style="margin-top:36px;color:var(--text);font-family:var(--font-body);font-weight:600;font-size:56px">aura.example</div>
+          <div class="mo-small" id="s8-note" style="margin-top:40px">Fictional product · made with idea-to-motion</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 3.81;
+      const tl = gsap.timeline({ paused: true });
+      // AURA orb: clear glass shell, a small violet light core with a fresnel halo, a teal swirl of light inside.
+      function auraOrb(st, R, o) {
+        o = o || {};
+        const T = st.T, g = new T.Group();
+        st.root.add(g);
+        MO3D.shape(st, "sphere", { size: R, mat: "glass", parent: g });
+        const cc = o.core || "#7C3AED";
+        const core = MO3D.shape(st, "sphere", { size: R * 0.26, mat: "neon", color: cc, glow: 0.9, parent: g });
+        MO3D.glow(st, core, { color: cc, size: 1.55, intensity: 0.7, power: 2.6 });
+        // Transparent layers inside the glass are drawn over it (transmission only sees opaque objects).
+        core.children.forEach((h) => { h.material.depthTest = false; h.renderOrder = 5; });
+        const swirl = new T.Group(); swirl.rotation.x = 0.55; g.add(swirl);
+        const sw = MO3D.particles(st, "galaxy", { count: 3000, radius: R * 0.8, colors: [cc, o.swirl || "--accent-2"], size: 2.2, arms: 2, twist: 2.2, parent: swirl });
+        sw.material.depthTest = false; sw.renderOrder = 6;
+        return { g, core, swirl };
+      }
+      MO.enter(tl, "#s8-scene", 0, "blur");
+      const st = MO3D.stage(tl, "#s8-gl", { D, cam: [0, 0, 9], look: [0, 1.4, 0], bg: "--bg", bloom: 0.5, bloomThreshold: 0.82, rim: "--accent-2" });
+      const T = st.T;
+      const A = auraOrb(st, 1.15), orb = A.g, core = A.core; orb.position.set(0, 2.2, 0);
+      MO3D.spin(tl, A.swirl, 0, { y: 0.6, dur: D });
+      MO3D.move(tl, orb, 0, { from: { s: 0.82 }, to: { s: 1 }, dur: D, ease: "power1.out" });
+      const halo = MO3D.shape(st, "ring", { size: 1.6, mat: "neon", color: "--accent-2", glow: 0.45, parent: orb });
+      halo.rotation.x = 1.25;
+      tl.fromTo(halo.rotation, { z: 0 }, { z: Math.PI * 0.6, duration: D, ease: "none" }, 0);
+      MO3D.particles(st, "field", { count: 500, radius: 7, colors: ["--accent", "#ffffff"], size: 2.5, opacity: 0.35 });
+      MO.reveal(tl, "#s8-btn", 0.15, { kind: "pop" });
+      MO.reveal(tl, "#s8-url", 0.4, { kind: "blur" });
+      MO.reveal(tl, "#s8-note", 0.7, { kind: "fade" });
+      MO.shine(tl, "#s8-btn", MO.snap("s8", 1.3));
+      window.__timelines["s8"] = tl;
+    })();
+  </script>
+</template>

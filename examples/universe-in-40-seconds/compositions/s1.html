@@ -1,0 +1,50 @@
+<template>
+  <div id="root" data-composition-id="s1" data-width="1920" data-height="1080">
+    <div class="mo-scene" id="s1-scene">
+      <div class="mo-gl-host" id="s1-gl"></div>
+      <div class="mo-stage" id="s1-stage">
+        <div class="mo-safe" style="top:330px;width:900px">
+          <div class="mo-kicker" id="s1-k">Planet Earth</div>
+          <h1 class="mo-hook" id="s1-h" style="font-size:138px;line-height:1.02;margin-top:26px">You are <span class="mo-accent">here.</span></h1>
+        </div>
+        <div id="s1-pin" class="u-pin"><span class="u-ring"></span><span class="u-dot"></span></div>
+      </div>
+      <div class="mo-grain"></div>
+    </div>
+  </div>
+  <style>
+    .u-pin { position: absolute; width: 64px; height: 64px; }
+    .u-dot { position: absolute; left: 22px; top: 22px; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 24px var(--accent); }
+    .u-ring { position: absolute; inset: 0; border-radius: 50%; border: 4px solid var(--accent); }
+  </style>
+  <script>
+    (function () {
+      const D = 4;
+      const tl = gsap.timeline({ paused: true });
+      const st = MO3D.stage(tl, "#s1-gl", { D, cam: [0, 0.25, 4.6], look: [0.75, 0, 0], fov: 32, bg: "--bg", bloom: 0.3, key: "#FFF1DE", rim: "#6FB6FF" });
+      MO3D.particles(st, "stars", { count: 3200, seed: 5 });
+      const earth = MO3D.planet(st, "earth", { size: 1, seed: 4 });
+      earth.position.set(1.75, 0, 0);
+      earth.rotation.z = 0.41;
+      const surf = earth.userData.surface;
+      tl.fromTo(surf.rotation, { y: -0.6 }, { y: -0.35, duration: D, ease: "none" }, 0);
+      tl.fromTo(earth.userData.clouds.rotation, { y: 0 }, { y: 0.06, duration: D, ease: "none" }, 0);
+      MO3D.cam(tl, st, 0, { pos: [0, 0.3, 5.6], look: [0.8, 0, 0], dur: D, ease: "power1.inOut" });
+      // The pin sits on the Earth's face turned to the camera, slightly up-left.
+      earth.updateMatrixWorld(true);
+      const c = earth.position.clone();
+      const dir = st.camera.position.clone().sub(c).normalize();
+      dir.applyAxisAngle(new st.T.Vector3(0, 1, 0), -0.32); dir.y += 0.38; dir.normalize();
+      const p = surf.worldToLocal(c.clone().add(dir));
+      MO3D.label(st, surf, "#s1-pin", { offset: [p.x, p.y, p.z] });
+      // Hook readable at frame 0.
+      MO.reveal(tl, ["#s1-k", "#s1-h"], 0, { kind: "settle", stagger: 0 });
+      const here = MO.atWord("s1", "here", { fallback: 1.2 });
+      tl.fromTo("#s1-pin", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(2.2)" }, here - 0.1);
+      tl.fromTo("#s1-pin .u-ring", { scale: 0.4, opacity: 1 }, { scale: 2.6, opacity: 0, duration: 1.2, ease: "power2.out", repeat: 1, repeatDelay: 0.2 }, here + 0.1);
+      MO.cue(here - 0.1, "pop", { gain: -2 });
+      MO.hide(tl, ["#s1-k", "#s1-h"], D - 0.45, { kind: "blur" });
+      window.__timelines["s1"] = tl;
+    })();
+  </script>
+</template>

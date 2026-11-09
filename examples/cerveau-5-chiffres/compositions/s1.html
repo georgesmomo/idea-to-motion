@@ -1,0 +1,37 @@
+<template>
+  <div id="root" data-composition-id="s1" data-width="1080" data-height="1920">
+    <div class="mo-scene" id="s1-scene">
+      <div class="mo-gl-host" id="s1-gl"></div>
+      <div class="glow" style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 33%, rgba(255,61,139,.22), transparent 55%)"></div>
+      <div class="mo-stage" id="s1-stage">
+        <div class="mo-center" style="top:285px" data-motion-blur="off">
+          <h1 class="mo-hook" id="s1-h" style="font-size:138px;line-height:1">Ton cerveau</h1>
+          <div class="mo-title" id="s1-t" style="font-size:96px;line-height:1;margin-top:8px">en <span class="mo-accent" style="display:inline-block;font-size:2.3em;line-height:0.8;vertical-align:-0.12em">5</span> chiffres</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 3.8;
+      const tl = gsap.timeline({ paused: true });
+      const st = MO3D.stage(tl, "#s1-gl", { D, cam: [0, 0, 10], look: [0, 0, 0], bg: "#07080F", bloom: 0.35, bloomThreshold: 0.97, rim: "#3DE1FF", envIntensity: 0.5, exposure: 0.9 });
+      const dust = MO3D.particles(st, "field", { count: 1400, radius: 7, colors: ["#FF3D8B", "#3DE1FF", "#ffffff"], size: 3, seed: 5 });
+      MO3D.spin(tl, dust, 0, { y: 0.08, dur: D });
+      // MO3D.svg normalises its size with obj.scale: animate a holder group, not the svg itself.
+      const brain = new st.T.Group();
+      st.root.add(brain);
+      MO3D.svg(st, "emoji-brain", { size: 2.1, depth: 0.16, parent: brain });
+      brain.position.set(0, -1.05, 0);
+      const fl = MO3D.hover(st, brain, { amp: 0.08, rot: 4, period: 3 });
+      // Frame 0: the hook is already readable; the brain turns into view.
+      MO3D.move(tl, brain, 0, { from: { ry: -22, s: 0.92 }, to: { ry: 18, s: 1 }, dur: 2.6, ease: "expo.out" });
+      MO3D.move(tl, brain, 2.6, { to: { ry: 0 }, dur: 1.2, ease: "power2.inOut" });
+      MO3D.cam(tl, st, 0, { pos: [0, -0.1, 8.8], dur: D, ease: "power1.inOut" });
+      MO.reveal(tl, ["#s1-h", "#s1-t"], 0, { kind: "settle", stagger: 0 });
+      MO.pulse(tl, "#s1-t .mo-accent", MO.atWord("s1", "5", { fallback: 1.2 }));
+      MO.exit(tl, "#s1-scene", D, "deep", { overlap: true });
+      window.__timelines["s1"] = tl;
+    })();
+  </script>
+</template>

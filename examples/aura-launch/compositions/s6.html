@@ -1,0 +1,58 @@
+<template>
+  <div id="root" data-composition-id="s6" data-width="1920" data-height="1080">
+    <div class="mo-scene" id="s6-scene">
+      <div class="mo-gl-host" id="s6-gl"></div>
+      <div class="mo-stage" id="s6-stage">
+        <div class="mo-center" style="top:auto;bottom:150px">
+          <div id="s6-w">
+            <div class="mo-hook" style="font-weight:800;letter-spacing:-0.04em">360°</div>
+            <div class="mo-hook" style="font-weight:800;letter-spacing:-0.04em">Private.</div>
+            <div class="mo-hook" style="font-weight:800;letter-spacing:-0.04em">20 h.</div>
+            <div class="mo-hook" style="font-weight:800;letter-spacing:-0.04em;color:var(--accent)">Light.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 1.905;
+      const tl = gsap.timeline({ paused: true });
+      // AURA orb: clear glass shell, a small violet light core with a fresnel halo, a teal swirl of light inside.
+      function auraOrb(st, R, o) {
+        o = o || {};
+        const T = st.T, g = new T.Group();
+        st.root.add(g);
+        MO3D.shape(st, "sphere", { size: R, mat: "glass", parent: g });
+        const cc = o.core || "#7C3AED";
+        const core = MO3D.shape(st, "sphere", { size: R * 0.26, mat: "neon", color: cc, glow: 0.9, parent: g });
+        MO3D.glow(st, core, { color: cc, size: 1.55, intensity: 0.7, power: 2.6 });
+        // Transparent layers inside the glass are drawn over it (transmission only sees opaque objects).
+        core.children.forEach((h) => { h.material.depthTest = false; h.renderOrder = 5; });
+        const swirl = new T.Group(); swirl.rotation.x = 0.55; g.add(swirl);
+        const sw = MO3D.particles(st, "galaxy", { count: 3000, radius: R * 0.8, colors: [cc, o.swirl || "--accent-2"], size: 2.2, arms: 2, twist: 2.2, parent: swirl });
+        sw.material.depthTest = false; sw.renderOrder = 6;
+        return { g, core, swirl };
+      }
+      // Beat montage: four hard cuts of the orb from different angles, one per beat, each with a small dolly.
+      const st = MO3D.stage(tl, "#s6-gl", { D, cam: [0, 0, 4.2], bg: "--bg", bloom: 0.55, bloomThreshold: 0.8, rim: "--accent-2" });
+      MO3D.particles(st, "stars", { count: 1500, colors: ["#ffffff", "--accent"] });
+      const A = auraOrb(st, 1.2);
+      MO3D.spin(tl, A.swirl, 0, { y: 1.6, dur: D });
+      const b = MO.beat();
+      const shots = [
+        [[0, 0, 4.4], [0, 0, 3.6], [0, 0, 0]],
+        [[5.2, 2.6, 4.8], [4.4, 2.2, 4.0], [0, 0, 0]],
+        [[-4.4, -1.4, 3.0], [-3.6, -1.1, 2.4], [0, 0, 0]],
+        [[0.4, 0.2, 2.9], [0.1, 0.05, 1.9], [0, 0, 0]],
+      ];
+      shots.forEach((s, i) => {
+        const t = +(i * b).toFixed(3), d = i === 3 ? D - t : b;
+        tl.fromTo(st.camera.position, { x: s[0][0], y: s[0][1], z: s[0][2] }, { x: s[1][0], y: s[1][1], z: s[1][2], duration: d, ease: i === 3 ? "power2.in" : "power1.out", immediateRender: i === 0 }, t);
+        if (i) MO.cue(t, "impact", { gain: -9 });
+      });
+      MO.punch(tl, "#s6-w", 0, { beat: b });
+      window.__timelines["s6"] = tl;
+    })();
+  </script>
+</template>

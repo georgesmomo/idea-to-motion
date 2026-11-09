@@ -1,0 +1,41 @@
+<template>
+  <div id="root" data-composition-id="s1" data-width="1920" data-height="1080">
+    <div class="mo-scene" id="s1-scene">
+      <div class="mo-gl-host" id="s1-gl"></div>
+      <div class="mo-stage" id="s1-stage">
+        <div class="mo-mid" style="gap:6px">
+          <h1 class="mo-mega" id="s1-a" style="font-weight:800;letter-spacing:-0.05em">Sound.</h1>
+          <div class="mo-title mo-muted" id="s1-b" style="font-weight:300;letter-spacing:-0.02em">Without the <span id="s1-box" style="color:var(--accent);font-weight:600">box</span>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 3.81;
+      const tl = gsap.timeline({ paused: true });
+      const st = MO3D.stage(tl, "#s1-gl", { D, cam: [0, 0, 9], bg: "--bg", bloom: 0.9, bloomThreshold: 0.6 });
+      const dust = MO3D.particles(st, "field", { count: 1400, radius: 10, colors: ["#ffffff", "--accent", "--accent-2"], size: 3, opacity: 0.55 });
+      MO3D.spin(tl, dust, 0, { y: 0.08, x: 0.03, dur: D });
+      // A wireframe box that frames the type, then folds away on "box".
+      const box = MO3D.shape(st, "box", { size: 2.2, mat: "wire", color: "--accent", opacity: 0.22 });
+      box.scale.set(1.9, 0.9, 0.9);
+      box.position.set(0, 0.35, -5);
+      box.rotation.set(0.12, -0.25, 0);
+      MO3D.spin(tl, box, 0, { y: 0.18, dur: 2.2, ease: "power1.inOut" });
+      const tBox = MO.atWord("s1", "box", { fallback: 1.6 });
+      tl.to(box.scale, { x: 0.001, y: 0.001, z: 0.001, duration: 0.55, ease: "back.in(2)" }, tBox + 0.15);
+      // The speck of light the camera dives into.
+      const speck = MO3D.shape(st, "sphere", { size: 0.12, mat: "neon", color: "--accent-2", glow: 4 });
+      speck.position.set(0, -2.0, 0);
+      MO3D.pop(tl, speck, tBox + 0.35, { turn: 0 });
+      MO3D.cam(tl, st, D - 1.5, { pos: [0, -2.0, 0.3], look: [0, -2.0, 0], dur: 1.5, ease: "power2.in" });
+      MO.reveal(tl, "#s1-a", 0, { kind: "settle" });
+      MO.reveal(tl, "#s1-b", MO.snap("s1", 0.95), { kind: "blur" });
+      MO.highlight(tl, "#s1-box", tBox, "--accent-2");
+      tl.to("#s1-stage", { opacity: 0, filter: "blur(10px)", scale: 1.15, duration: 0.6, ease: "power2.in" }, D - 1.5);
+      MO.exit(tl, "#s1-scene", D, "blur", { overlap: true });
+      window.__timelines["s1"] = tl;
+    })();
+  </script>
+</template>

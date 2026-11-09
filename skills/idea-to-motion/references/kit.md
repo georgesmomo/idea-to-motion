@@ -173,7 +173,7 @@ d.cascade(tl, ["farm", "shop"], t, "--ok"); d.tint(tl, "farm", "shop", t, "--err
 
 | Call | What |
 |---|---|
-| `MO.enter(tl, stage, 0, kind)` | scene entrance; kinds `push whip up zoom fade rise iris wipe cut`; default: the style's |
+| `MO.enter(tl, stage, 0, kind)` | scene entrance; kinds `push whip up zoom fade rise iris wipe cut`, and with an overlap (below) `cube cubeUp deck flip blur spin deep back`; default: the style's |
 | `MO.exit(tl, stage, D, kind)` | exit ending exactly at D; pair with the next scene's enter |
 | `MO.panel(tl, "#sN-scene", D, { color, half: "in" })` + `MO.panel(tl, "#sN+1-scene", 0, { half: "out" })` | a colour panel wipes over the cut (bold, editorial) |
 | `MO.zoom(tl, cam, target, at, { scale })` / `MO.home(tl, cam, at)` | centre the camera on an element / back |
@@ -183,6 +183,71 @@ d.cascade(tl, ["farm", "shop"], t, "--ok"); d.tint(tl, "farm", "shop", t, "--err
 
 Use one transition family per video (plus dive/zoom). Hard cuts are fine and often better
 on the beat.
+
+**Overlapping scenes (3D and blended transitions).** `"overlap": 0.6` on a scene in project.json
+starts it 0.6 s before the previous one ends, so both are on screen during the transition.
+Put the enter on the incoming `#sN-scene` (the whole scene, background included) and the exit
+on the outgoing `#sN-scene` with `{ overlap: true }` (one whoosh, from the enter):
+
+| Kind | Feel | Overlap |
+|---|---|---|
+| `cube` / `cubeUp` | the frame turns like a cube face (left / up) | 0.8 |
+| `deck` | next scene slides in from depth, the old one swings away | 0.7–0.8 |
+| `blur` | soft crossfade with blur (emotional, cinematic) | 0.6 |
+| `deep` | fly into the next scene (zoom in) | 0.6–0.7 |
+| `back` | pull back to the next scene (zoom out, "powers of ten") | 0.7–0.8 |
+| `spin` | twist and blur (social, high energy) | 0.5 |
+| `flip` | card flip (no overlap needed: exit 0.3 s, enter 0.35 s) | 0 |
+
+`"motionBlur": true` in project.json turns on HyperFrames' render-time motion blur (fast moves
+smear like a real camera; `true` or a shutter angle such as 270). It adds render time. Put
+`data-motion-blur="off"` on the hook block of s1 (an inline span moved by GSAP can drop out
+of the first frames under blur).
+
+## 3D (MO3D, three.js)
+
+Any scene that calls `MO3D.` gets three.js, the 3D layer and the style's fonts as 3D outlines
+(display and body, heaviest weight) at sync. Everything is drawn from the scene timeline, so
+it is seek-safe; animate objects with GSAP on `obj.position`, `obj.rotation`, `obj.scale`.
+
+```html
+<div class="mo-scene" id="s2-scene">
+  <div class="mo-gl-host" id="s2-gl"></div>          <!-- the 3D canvas, full frame -->
+  <div class="mo-stage" id="s2-stage"> …HTML text over the 3D… </div>
+</div>
+<script>
+  const st = MO3D.stage(tl, "#s2-gl", { D, cam: [0, 0.5, 9], look: [0, 0, 0], bg: "--bg", bloom: 0.5 });
+  const word = MO3D.text(st, "LAUNCH", { size: 1.4, mat: "chrome", letters: true });
+  MO3D.letters(tl, word, 0.1);                        // letters flip up one by one
+  const orb = MO3D.shape(st, "sphere", { size: 1.2, mat: "glass" });
+  MO3D.pop(tl, orb, 0.8);
+  MO3D.cam(tl, st, 1.5, { pos: [2.5, 1, 7], dur: 2.5 }); // camera move
+</script>
+```
+
+| Call | What |
+|---|---|
+| `MO3D.stage(tl, host, { D, cam, look, fov, bg, bloom, fog, floor, env, exposure })` | renderer, camera, studio light (warm key, rim in the accent), environment reflections. `bg: "--bg"` + `bloom: 0.3–0.9` for glow; `floor: { y }` adds a contact shadow. Returns `st` (`st.T` is THREE, `st.scene`, `st.camera`, `st.frame(fn)`) |
+| `MO3D.text(st, "WORD", { size, depth, mat, color, letters, font: "display"\|"body", align })` | extruded 3D type in the style's font, centred on its capitals |
+| `MO3D.letters(tl, group, at, { kind: "flip"\|"drop"\|"spin"\|"rise", stagger })` | per-letter entrance (`letters: true` text) |
+| `MO3D.shape(st, kind, { size, mat, color })` | `sphere box rbox torus knot icosa octa dodeca ring cylinder cone capsule coin plane blob` |
+| `MO3D.mat(kind, color)` | `gold chrome metal glass plastic satin clay neon pearl toon wire basic` (neon: `glow` 0.5–1 keeps the colour) |
+| `MO3D.svg(st, "emoji-brain", { size, depth, mat })` | extrude an emoji, a brand logo or any filled SVG, keeping its colours (`motion icon emoji:brain --project`), satin finish by default. Stroke icons (lucide) cannot be extruded |
+| `MO3D.particles(st, kind, { count, radius, colors, size })` | `stars field galaxy sphere ring dust` point clouds |
+| `MO3D.planet(st, kind, { size, seed })` | procedural `earth moon mars sun gas ice rock` (no image files), with atmosphere |
+| `MO3D.galaxies(st, { count, radius })` / `MO3D.glow(st, mesh, { color })` | a field of spiral galaxies / a fresnel halo |
+| `MO3D.label(st, obj, "#s2-pin", { offset })` | pin an HTML element (a label, a pin, a price tag) to a 3D point; put it inside `.mo-stage` |
+| `MO3D.move(tl, obj, at, { from, to, dur, ease })` | tween `x y z rx ry rz s opacity` (degrees) |
+| `MO3D.pop` · `spin` · `fade` · `hover` | spring in with a half turn · turn · fade materials · idle bob |
+| `MO3D.cam(tl, st, at, { pos, look, fov, dur, ease })` · `MO3D.orbit(tl, st, at, { from, to, radius, height, dur })` | camera moves |
+
+3D craft: one hero object beats a crowd; move the camera (dolly, orbit, dive) rather than
+spinning the object; text stays HTML over the 3D (sharper, checked for safe areas), 3D type is
+for logos and one-word titles; keep bloom for the brightest points (threshold ≥ 0.7). Emissive and neon colours must be
+saturated (`#7C3AED`, not a pastel), or tone mapping turns them white. Particles or a glow
+inside a `glass` object are invisible to its refraction: set `material.depthTest = false` and
+`renderOrder = 5` on them. `MO3D.glow` sizes 1.05–1.6 (larger draws a visible disc). The
+check measures text positions without drawing the 3D; look at the stills for the 3D itself.
 
 ## Beat sync
 

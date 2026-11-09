@@ -1,0 +1,38 @@
+<template>
+  <div id="root" data-composition-id="s3" data-width="1080" data-height="1920">
+    <div class="mo-scene" id="s3-scene">
+      <div class="mo-gl-host" id="s3-gl"></div>
+      <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 30%, rgba(255,210,61,.16), transparent 55%)"></div>
+      <div class="mo-stage" id="s3-stage">
+        <div class="mo-center" style="top:300px"><div class="mo-kicker" id="s3-k">2 / 5 · poids</div></div>
+        <div class="mo-center" style="top:1090px;max-width:700px;margin:0 auto">
+          <div class="mo-title" id="s3-t">à peine.</div>
+          <div class="mo-body mo-muted" id="s3-b" style="margin-top:14px">Moins qu'une bouteille d'eau de 1,5 L.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 4.4;
+      const tl = gsap.timeline({ paused: true });
+      MO.enter(tl, "#s3-scene", 0, "cube");
+      const st = MO3D.stage(tl, "#s3-gl", { D, cam: [0, 0.4, 10], look: [0, 0.3, 0], bg: "#07080F", bloom: 0.35, bloomThreshold: 0.95, rim: "#FFD23D", floor: { y: -0.05, opacity: 0.5 } });
+      MO3D.particles(st, "stars", { count: 1500, colors: ["#ffffff", "#FFD23D"] });
+      const scaleH = new st.T.Group(); st.root.add(scaleH);
+      MO3D.svg(st, "emoji-balance-scale", { size: 1.2, parent: scaleH });
+      scaleH.position.set(0, 1.75, -0.5);
+      MO3D.move(tl, scaleH, 0.1, { from: { rz: -14, ry: -40 }, to: { rz: 0, ry: 0 }, dur: 2.2, ease: "elastic.out(1, 0.45)" });
+      const kg = MO3D.text(st, "1,4 kg", { size: 0.8, mat: "gold", letters: true, depth: 0.45, tracking: 0.02 });
+      kg.position.set(0, 0.45, 0.6);
+      const tk = MO.atWord("s3", "1,4", { fallback: 1.4 });
+      MO3D.letters(tl, kg, Math.max(0.2, tk - 0.5), { kind: "drop", stagger: 0.07, dur: 0.8 });
+      MO3D.cam(tl, st, 0.3, { pos: [-1.2, 1.0, 8.6], dur: D - 0.3, ease: "power1.inOut" });
+      MO.reveal(tl, "#s3-k", 0.2, { kind: "rise" });
+      MO.reveal(tl, "#s3-t", MO.atWord("s3", "peine", { fallback: 1.1 }), { kind: "slam" });
+      MO.reveal(tl, "#s3-b", MO.atWord("s3", "peine", { fallback: 1.1 }) + 0.35, { kind: "rise" });
+      MO.exit(tl, "#s3-scene", D, "cubeUp", { overlap: true });
+      window.__timelines["s3"] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,54 @@
+<template>
+  <div id="root" data-composition-id="s5" data-width="1920" data-height="1080">
+    <div class="mo-scene" id="s5-scene">
+      <div class="mo-gl-host" id="s5-gl"></div>
+      <div class="mo-stage" id="s5-stage">
+        <div class="mo-safe" style="top:130px;left:auto;right:96px;width:1060px;text-align:right">
+          <div class="mo-kicker" id="s5-k" style="color:var(--accent-2)">03 · Battery</div>
+          <div class="mo-stat" style="font-size:400px;font-weight:800;letter-spacing:-0.07em;line-height:0.95;white-space:nowrap"><span id="s5-n">0</span><span id="s5-h" style="font-size:0.42em;font-weight:300;letter-spacing:-0.02em;color:var(--accent-2)"> h</span></div>
+          <div class="mo-title" id="s5-t" style="font-weight:300">hours on a single charge.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 4.76;
+      const tl = gsap.timeline({ paused: true });
+      // AURA orb: clear glass shell, a small violet light core with a fresnel halo, a teal swirl of light inside.
+      function auraOrb(st, R, o) {
+        o = o || {};
+        const T = st.T, g = new T.Group();
+        st.root.add(g);
+        MO3D.shape(st, "sphere", { size: R, mat: "glass", parent: g });
+        const cc = o.core || "#7C3AED";
+        const core = MO3D.shape(st, "sphere", { size: R * 0.26, mat: "neon", color: cc, glow: 0.9, parent: g });
+        MO3D.glow(st, core, { color: cc, size: 1.55, intensity: 0.7, power: 2.6 });
+        // Transparent layers inside the glass are drawn over it (transmission only sees opaque objects).
+        core.children.forEach((h) => { h.material.depthTest = false; h.renderOrder = 5; });
+        const swirl = new T.Group(); swirl.rotation.x = 0.55; g.add(swirl);
+        const sw = MO3D.particles(st, "galaxy", { count: 3000, radius: R * 0.8, colors: [cc, o.swirl || "--accent-2"], size: 2.2, arms: 2, twist: 2.2, parent: swirl });
+        sw.material.depthTest = false; sw.renderOrder = 6;
+        return { g, core, swirl };
+      }
+      MO.enter(tl, "#s5-scene", 0, "whip");
+      const st = MO3D.stage(tl, "#s5-gl", { D, cam: [0, 0.2, 8], look: [-3, 0, 0], bg: "--bg", bloom: 0.5, bloomThreshold: 0.82, floor: { y: -1.6, opacity: 0.5 }, rim: "--accent-2" });
+      const T = st.T;
+      const A = auraOrb(st, 1.3, { core: "#0D9488", swirl: "--accent" }), orb = A.g, core = A.core; orb.position.set(-5.6, -0.1, -0.5);
+      // The core fills up like a battery while the number counts.
+      tl.fromTo(core.scale, { x: 0.15, y: 0.15, z: 0.15 }, { x: 1, y: 1, z: 1, duration: 1.8, ease: "power2.out", immediateRender: true }, 0.3);
+      MO3D.spin(tl, A.swirl, 0, { y: 1.0, dur: D });
+      tl.fromTo(A.swirl.scale, { x: 0.2, y: 0.2, z: 0.2 }, { x: 1, y: 1, z: 1, duration: 1.8, ease: "power2.out", immediateRender: true }, 0.3);
+      const halo = MO3D.shape(st, "ring", { size: 1.45, mat: "neon", color: "--accent", glow: 0.7, parent: orb });
+      halo.rotation.x = 1.3;
+      tl.fromTo(halo.rotation, { z: 0 }, { z: Math.PI, duration: D, ease: "none" }, 0);
+      MO3D.cam(tl, st, 0, { pos: [0.6, 0.5, 7.2], dur: D, ease: "power1.inOut" });
+      MO.reveal(tl, "#s5-k", 0.05, { kind: "blur" });
+      MO.reveal(tl, "#s5-n", 0.1, { kind: "blur" });
+      MO.count(tl, "#s5-n", 0, 20, 0.3, { dur: 1.8 });
+      MO.reveal(tl, "#s5-h", 0.1, { kind: "blur" });
+      MO.reveal(tl, "#s5-t", MO.atWord("s5", "single", { fallback: 1.6 }) - 0.2, { kind: "rise" });
+      window.__timelines["s5"] = tl;
+    })();
+  </script>
+</template>

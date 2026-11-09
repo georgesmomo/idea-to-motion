@@ -1,0 +1,98 @@
+{
+  "title": "universe-in-40-seconds",
+  "ratio": "16:9",
+  "style": "darktech",
+  "lang": "en",
+  "fps": 30,
+  "sound": "auto",
+  "music": {
+    "mood": "epic",
+    "volume": 0.85,
+    "seed": 7
+  },
+  "voice": {
+    "voice": "bm_george",
+    "speed": 0.95
+  },
+  "scenes": [
+    {
+      "id": "s1",
+      "duration": 4,
+      "beat": "hook: You are here (Earth close)",
+      "vo": "You are here.",
+      "voAt": 0.6
+    },
+    {
+      "id": "s2",
+      "duration": 5.5,
+      "beat": "pull back: the Moon, 384,400 km",
+      "vo": "The Moon: 384,400 km away.",
+      "say": "The Moon. Three hundred and eighty-four thousand kilometres away.",
+      "voAt": 0.4
+    },
+    {
+      "id": "s3",
+      "duration": 7.2,
+      "beat": "the Sun: 150 million km, light 8 min old",
+      "vo": "The Sun: 150 million km. The light you see left it 8 minutes ago.",
+      "say": "The Sun. A hundred and fifty million kilometres. The light you see left it eight minutes ago.",
+      "voAt": 0.5,
+      "overlap": 0.6
+    },
+    {
+      "id": "s4",
+      "duration": 5,
+      "beat": "solar system becomes a speck",
+      "vo": "Our whole solar system is a speck…",
+      "say": "Our whole solar system, is a speck.",
+      "voAt": 0.4,
+      "overlap": 0.6
+    },
+    {
+      "id": "s5",
+      "duration": 7,
+      "beat": "Milky Way: 100,000 ly, up to 400 billion stars",
+      "vo": "…in the Milky Way: 100,000 light-years across, up to 400 billion stars.",
+      "say": "in the Milky Way. A hundred thousand light-years across. Up to four hundred billion stars.",
+      "voAt": 0.3,
+      "hit": true,
+      "overlap": 0.5
+    },
+    {
+      "id": "s6",
+      "duration": 5,
+      "beat": "one of hundreds of billions of galaxies",
+      "vo": "And it is one of hundreds of billions of galaxies.",
+      "voAt": 0.3,
+      "overlap": 0.5
+    },
+    {
+      "id": "s7",
+      "duration": 5.5,
+      "beat": "observable universe: 93 billion ly",
+      "vo": "The observable universe: 93 billion light-years across.",
+      "say": "The observable universe. Ninety-three billion light-years across.",
+      "voAt": 0.4,
+      "overlap": 0.6
+    },
+    {
+      "id": "s8",
+      "duration": 5,
+      "beat": "end: look up tonight",
+      "vo": "Look up tonight.",
+      "voAt": 0.8,
+      "overlap": 0.8
+    }
+  ],
+  "motionBlur": true,
+  "captions": false,
+  "brand": {
+    "bg": "#03040A",
+    "text": "#F5F3EE",
+    "accent": "#FFC46B",
+    "accent2": "#6FB6FF",
+    "onAccent": "#120C02",
+    "displayFont": "Unbounded",
+    "bodyFont": "Inter"
+  }
+}

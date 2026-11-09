@@ -1,0 +1,89 @@
+{
+  "title": "cerveau-5-chiffres",
+  "ratio": "9:16",
+  "style": "darktech",
+  "lang": "fr",
+  "fps": 30,
+  "sound": "auto",
+  "music": {
+    "mood": "energetic",
+    "volume": 0.8
+  },
+  "voice": {
+    "voice": "ff_siwis",
+    "speed": 1.05
+  },
+  "scenes": [
+    {
+      "id": "s1",
+      "duration": 3.8,
+      "beat": "hook: your brain in 5 numbers",
+      "vo": "Ton cerveau, en 5 chiffres.",
+      "say": "Ton cerveau, en cinq chiffres.",
+      "voAt": 0.25
+    },
+    {
+      "id": "s2",
+      "duration": 4.8,
+      "overlap": 0.6,
+      "beat": "86 billion neurons",
+      "vo": "86 milliards de neurones.",
+      "say": "Quatre-vingt-six milliards de neurones.",
+      "voAt": 0.45
+    },
+    {
+      "id": "s3",
+      "duration": 4.4,
+      "overlap": 0.8,
+      "beat": "1.4 kg",
+      "vo": "Le tout pèse à peine 1,4 kilo.",
+      "say": "Le tout pèse à peine un kilo quatre.",
+      "voAt": 0.6
+    },
+    {
+      "id": "s4",
+      "duration": 5.6,
+      "overlap": 0.8,
+      "beat": "2% of weight, 20% of energy",
+      "vo": "2 % de ton poids… mais 20 % de ton énergie.",
+      "say": "Deux pour cent de ton poids, mais vingt pour cent de ton énergie.",
+      "voAt": 0.6,
+      "hit": true
+    },
+    {
+      "id": "s5",
+      "duration": 4.8,
+      "overlap": 0.5,
+      "beat": "430 km/h signals",
+      "vo": "Ses signaux filent jusqu'à 430 km/h.",
+      "say": "Ses signaux filent jusqu'à quatre cent trente kilomètres heure.",
+      "voAt": 0.4
+    },
+    {
+      "id": "s6",
+      "duration": 4.4,
+      "overlap": 0.8,
+      "beat": "73% water",
+      "vo": "Et il contient 73 % d'eau.",
+      "say": "Et il contient soixante-treize pour cent d'eau.",
+      "voAt": 0.6
+    },
+    {
+      "id": "s7",
+      "duration": 5.4,
+      "overlap": 0.6,
+      "beat": "end card: share",
+      "vo": "Partage à quelqu'un qui devrait s'en servir plus.",
+      "voAt": 0.5
+    }
+  ],
+  "motionBlur": true,
+  "captions": false,
+  "brand": {
+    "accent": "#FF3D8B",
+    "accent2": "#3DE1FF",
+    "accent3": "#FFD23D",
+    "onAccent": "#07080F",
+    "bg": "#07080F"
+  }
+}

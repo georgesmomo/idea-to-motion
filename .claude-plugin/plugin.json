@@ -1,10 +1,25 @@
 {
   "name": "idea-to-motion",
-  "version": "1.0.0",
-  "description": "Turn any idea into a motion-design video (MP4) with music, sound effects and optional voice-over. One line in, a studio-style video out, or 3 quick questions first.",
-  "author": { "name": "Georges MOMO", "url": "https://github.com/georgesmomo" },
+  "version": "1.1.0",
+  "description": "Turn any idea into a motion-design video (MP4) with 3D, cinematic transitions, music, sound effects and optional voice-over. One line in, a studio-style video out, or 3 quick questions first.",
+  "author": {
+    "name": "Georges MOMO",
+    "url": "https://github.com/georgesmomo"
+  },
   "homepage": "https://github.com/georgesmomo/idea-to-motion",
   "repository": "https://github.com/georgesmomo/idea-to-motion",
   "license": "MIT",
-  "keywords": ["motion-design", "motion-graphics", "video", "kinetic-typography", "explainer-video", "text-to-video", "hyperframes", "gsap", "agent-skills"]
+  "keywords": [
+    "motion-design",
+    "motion-graphics",
+    "video",
+    "kinetic-typography",
+    "explainer-video",
+    "text-to-video",
+    "hyperframes",
+    "gsap",
+    "agent-skills",
+    "3d",
+    "threejs"
+  ]
 }

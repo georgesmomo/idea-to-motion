@@ -1,0 +1,32 @@
+<template>
+  <div id="root" data-composition-id="s8" data-width="1920" data-height="1080">
+    <div class="mo-scene" id="s8-scene">
+      <div class="mo-gl-host" id="s8-gl"></div>
+      <div class="mo-stage" id="s8-stage">
+        <div class="mo-center" style="top:180px">
+          <h1 class="mo-mega" id="s8-h" style="font-size:190px">Look up</h1>
+          <div class="mo-hook mo-accent" id="s8-t" style="font-size:120px;margin-top:10px">tonight.</div>
+        </div>
+      </div>
+      <div class="mo-grain"></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 5;
+      const tl = gsap.timeline({ paused: true });
+      MO.enter(tl, "#s8-scene", 0, "blur");
+      const st = MO3D.stage(tl, "#s8-gl", { D, cam: [0, 0.4, 10], look: [0, -0.6, 0], fov: 34, bg: "--bg", bloom: 0.5, key: "#FFF1DE", rim: "#6FB6FF" });
+      MO3D.particles(st, "stars", { count: 4200, seed: 88 });
+      const earth = MO3D.planet(st, "earth", { size: 1.9, seed: 4, res: 1024 });
+      earth.position.set(0, -4.1, 0);
+      earth.rotation.z = 0.41;
+      tl.fromTo(earth.userData.surface.rotation, { y: 0.2 }, { y: 0.45, duration: D, ease: "none" }, 0);
+      MO3D.cam(tl, st, 0, { pos: [0, 0.2, 8.6], dur: D, ease: "power1.out" });
+      const tw = MO.atWord("s8", "Look", { fallback: 0.8 });
+      MO.words(tl, "#s8-h", tw - 0.05, { kind: "blur" });
+      MO.reveal(tl, "#s8-t", MO.atWord("s8", "tonight", { fallback: 1.4 }) - 0.05, { kind: "blur" });
+      window.__timelines["s8"] = tl;
+    })();
+  </script>
+</template>

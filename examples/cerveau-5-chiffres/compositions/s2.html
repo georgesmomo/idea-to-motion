@@ -1,0 +1,40 @@
+<template>
+  <div id="root" data-composition-id="s2" data-width="1080" data-height="1920">
+    <div class="mo-scene" id="s2-scene">
+      <div class="mo-gl-host" id="s2-gl"></div>
+      <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 36%, rgba(61,225,255,.16), transparent 55%)"></div>
+      <div class="mo-stage" id="s2-stage">
+        <div class="mo-center" style="top:300px"><div class="mo-kicker" id="s2-k">1 / 5 · neurones</div></div>
+        <div class="mo-center" style="top:1020px;max-width:700px;margin:0 auto">
+          <div class="mo-mega" id="s2-m" style="line-height:1;font-size:150px">milliards</div>
+          <div class="mo-title mo-muted" id="s2-t" style="margin-top:18px">de neurones</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 4.8;
+      const tl = gsap.timeline({ paused: true });
+      MO.enter(tl, "#s2-scene", 0, "deep");
+      const st = MO3D.stage(tl, "#s2-gl", { D, cam: [0, 0, 11], look: [0, 0, 0], bg: "#07080F", bloom: 0.25, bloomThreshold: 1.0, rim: "#FF3D8B", envIntensity: 0.3, exposure: 0.8 });
+      // A turning cloud of "neurons" around the number.
+      const net = MO3D.particles(st, "sphere", { count: 2000, radius: 3.6, colors: ["#3DE1FF", "#FF3D8B", "#ffffff"], size: 3, seed: 9 });
+      net.position.set(0, 0.2, -2.2);
+      MO3D.spin(tl, net, 0, { y: 0.25, x: 0.06, dur: D });
+      MO3D.move(tl, net, 0, { from: { s: 0.4 }, to: { s: 1 }, dur: 1.4, ease: "expo.out" });
+      const n = MO3D.text(st, "86", { size: 1.6, mat: "metal", color: "#B8C2CE", roughness: 0.55, letters: true, depth: 0.7 });
+      n.position.set(0, 1.1, 0);
+      const t86 = MO.atWord("s2", "86", { fallback: 0.5 });
+      MO3D.letters(tl, n, Math.max(0.15, t86 - 0.15), { kind: "flip", stagger: 0.12, dur: 1 });
+      MO3D.move(tl, n, 0.2, { from: { ry: -25 }, to: { ry: 12 }, dur: D - 0.2, ease: "power1.inOut" });
+      MO3D.cam(tl, st, 0.2, { pos: [0.5, -0.1, 9.8], dur: D - 0.2, ease: "power1.inOut" });
+      MO.reveal(tl, "#s2-k", 0.15, { kind: "rise" });
+      MO.reveal(tl, "#s2-m", MO.snap("s2", MO.atWord("s2", "milliards", { fallback: 1.2 })), { kind: "slam" });
+      MO.reveal(tl, "#s2-t", MO.atWord("s2", "neurones", { fallback: 1.8 }), { kind: "rise" });
+      MO.hide(tl, "#s2-k", D - 1.0, { kind: "fade" });
+      MO.exit(tl, "#s2-scene", D, "cube", { overlap: true });
+      window.__timelines["s2"] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,60 @@
+<template>
+  <div id="root" data-composition-id="s4" data-width="1080" data-height="1920">
+    <div class="mo-scene" id="s4-scene">
+      <div class="mo-gl-host" id="s4-gl"></div>
+      <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 38%, rgba(255,61,139,.2), transparent 55%)"></div>
+      <div class="mo-stage" id="s4-stage">
+        <div class="mo-center" style="top:300px"><div class="mo-kicker" id="s4-k">3 / 5 · énergie</div></div>
+        <div class="mo-center" style="top:400px" id="s4-small">
+          <div class="mo-title mo-muted" id="s4-a"><span class="mo-stat" style="font-size:1.3em;color:var(--text)">2 %</span> de ton poids…</div>
+        </div>
+        <div class="mo-center" style="top:1110px;max-width:700px;margin:0 auto">
+          <div class="mo-title mo-muted" id="s4-m">mais…</div>
+          <div class="mo-title" id="s4-e" style="margin-top:6px">de ton <span class="mo-accent">énergie</span></div>
+        </div>
+      </div>
+      <div class="mo-flash" id="s4-flash"></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 5.6;
+      const tl = gsap.timeline({ paused: true });
+      MO.enter(tl, "#s4-scene", 0, "cubeUp");
+      const st = MO3D.stage(tl, "#s4-gl", { D, cam: [0, 0, 10], look: [0, 0, 0], bg: "#07080F", bloom: 0.5, bloomThreshold: 0.95, rim: "#FF3D8B", envIntensity: 0.6, exposure: 0.9 });
+      const ring = MO3D.particles(st, "ring", { count: 2200, radius: 2.4, colors: ["#FF3D8B", "#FFD23D", "#ffffff"], size: 2.5, seed: 4 });
+      ring.position.set(0, 0.6, -1); ring.rotation.x = 1.15;
+      MO3D.spin(tl, ring, 0, { y: 0.35, dur: D });
+      const tMais = MO.snap("s4", MO.atWord("s4", "mais", { fallback: 2.2 }));
+      MO3D.fade(tl, ring, 0, { from: 0.15, to: 0.15, dur: 0.01 });
+      MO3D.fade(tl, ring, tMais, { from: 0.15, to: 1, dur: 0.6 });
+      const bat = new st.T.Group(); st.root.add(bat);
+      MO3D.svg(st, "emoji-battery", { size: 0.85, mat: "clay", parent: bat });
+      bat.position.set(0, 1.38, 0); bat.rotation.z = -Math.PI / 2;
+      bat.scale.setScalar(0.001);
+      MO3D.move(tl, bat, tMais + 0.15, { from: { s: 0.001, ry: -180 }, to: { s: 1, ry: 0 }, dur: 0.9, ease: "back.out(1.7)" });
+      MO3D.move(tl, bat, tMais + 1.05, { from: { ry: 0 }, to: { ry: 25 }, dur: D - tMais - 1.05, ease: "sine.inOut" });
+      // Before "mais": a small grey 3D "2%" (the weight), pushed away when 20 % arrives.
+      const small = MO3D.text(st, "2%", { size: 0.95, mat: "clay", color: "#8B98A8", letters: true, depth: 0.35 });
+      small.position.set(0, 0.35, 0);
+      const t2 = Math.max(0.3, MO.atWord("s4", "2", { fallback: 0.6 }) - 0.15);
+      MO3D.letters(tl, small, t2, { kind: "rise", stagger: 0.08, dur: 0.8, sfx: false });
+      MO3D.move(tl, small, t2, { from: { ry: -20 }, to: { ry: 12 }, dur: tMais - t2, ease: "sine.inOut" });
+      MO3D.move(tl, small, tMais - 0.05, { from: { z: 0, s: 1 }, to: { z: -6, s: 0.001 }, dur: 0.45, ease: "power3.in" });
+      const big = MO3D.text(st, "20%", { size: 1.1, mat: "neon", color: "#FF3D8B", letters: true, depth: 0.5 });
+      big.position.set(0, 0.25, 0.5);
+      MO3D.letters(tl, big, tMais, { kind: "spin", stagger: 0.08, dur: 0.8, sfx: false });
+      MO.cue(tMais, "impact", { gain: -2 });
+      MO3D.cam(tl, st, tMais, { pos: [0, 0, 8.7], dur: 0.6, ease: "expo.out" });
+      MO3D.cam(tl, st, tMais + 0.6, { pos: [0.5, 0.2, 8.2], dur: D - tMais - 0.6, ease: "none" });
+      MO.reveal(tl, "#s4-k", 0.25, { kind: "rise" });
+      MO.reveal(tl, "#s4-a", Math.max(0.35, MO.atWord("s4", "2", { fallback: 0.6 }) - 0.1), { kind: "rise" });
+      tl.to("#s4-small", { y: -40, opacity: 0, duration: 0.5, ease: "power2.inOut" }, tMais + 0.2);
+      MO.reveal(tl, "#s4-m", tMais, { kind: "slam" });
+      MO.reveal(tl, "#s4-e", MO.atWord("s4", "énergie", { fallback: tMais + 0.8 }), { kind: "rise" });
+      MO.flash(tl, "#s4-flash", tMais);
+      MO.exit(tl, "#s4-scene", D, "spin", { overlap: true });
+      window.__timelines["s4"] = tl;
+    })();
+  </script>
+</template>

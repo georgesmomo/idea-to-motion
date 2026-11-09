@@ -11,3 +11,7 @@ node_modules/
 **/assets/vendor/
 **/assets/fonts/
 **/cues.auto.json
+**/renders/
+**/assets/mo/*
+!**/assets/mo/icons.js
+**/index.html

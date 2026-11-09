@@ -1,0 +1,35 @@
+<template>
+  <div id="root" data-composition-id="s6" data-width="1920" data-height="1080">
+    <div class="mo-scene" id="s6-scene">
+      <div class="mo-gl-host" id="s6-gl"></div>
+      <div class="mo-stage" id="s6-stage">
+        <div class="u-vig"></div>
+        <div class="mo-mid" style="flex-direction:column;justify-content:center;align-items:center;text-align:center">
+          <div class="mo-kicker" id="s6-k">And it is one of</div>
+          <div class="mo-hook" id="s6-h" style="font-size:126px;line-height:1.02;margin-top:24px"><span class="mo-accent">hundreds of billions</span><br>of galaxies.</div>
+        </div>
+      </div>
+      <div class="mo-grain"></div>
+    </div>
+  </div>
+  <style>
+    .u-vig { position: absolute; inset: 0; background: radial-gradient(ellipse 52% 40% at 50% 52%, rgba(3,4,10,0.82), rgba(3,4,10,0) 100%); }
+  </style>
+  <script>
+    (function () {
+      const D = 5;
+      const tl = gsap.timeline({ paused: true });
+      MO.enter(tl, "#s6-scene", 0, "deep");
+      const st = MO3D.stage(tl, "#s6-gl", { D, cam: [0, 0, 20], look: [0, 0, -10], fov: 50, bg: "--bg", bloom: 0.7, bloomThreshold: 0.55 });
+      MO3D.particles(st, "stars", { count: 2000, seed: 41 });
+      const field = MO3D.galaxies(st, { count: 130, radius: 26, per: 1400, seed: 17, size: 2.8 });
+      // Fly forward through the field.
+      MO3D.cam(tl, st, 0, { pos: [0.6, 0.3, 6], look: [1, 0.2, -30], dur: D, ease: "power1.out" });
+      tl.fromTo(field.rotation, { z: 0 }, { z: 0.12, duration: D, ease: "none" }, 0);
+      MO.reveal(tl, "#s6-k", 0.05, { kind: "rise" });
+      MO.words(tl, "#s6-h", MO.atWord("s6", "hundreds", { fallback: 1.1 }) - 0.1, { kind: "blur" });
+      MO.exit(tl, "#s6-scene", D, "back", { overlap: true });
+      window.__timelines["s6"] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,41 @@
+<template>
+  <div id="root" data-composition-id="s5" data-width="1080" data-height="1920">
+    <div class="mo-scene" id="s5-scene">
+      <div class="mo-gl-host" id="s5-gl"></div>
+      <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 32%, rgba(255,210,61,.2), transparent 55%)"></div>
+      <div class="mo-stage" id="s5-stage">
+        <div class="mo-center" style="top:300px"><div class="mo-kicker" id="s5-k">4 / 5 · vitesse</div></div>
+        <div class="mo-center" style="top:1010px;max-width:700px;margin:0 auto">
+          <div class="mo-row" style="justify-content:center;align-items:baseline;gap:20px">
+            <span class="mo-mega mo-accent-3" id="s5-n" style="line-height:1">430</span>
+            <span class="mo-title" id="s5-u">km/h</span>
+          </div>
+          <div class="mo-body mo-muted" id="s5-b" style="margin-top:18px">Plus vite qu'un TGV.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 4.8;
+      const tl = gsap.timeline({ paused: true });
+      MO.enter(tl, "#s5-scene", 0, "spin");
+      const st = MO3D.stage(tl, "#s5-gl", { D, cam: [0, 0, 10], look: [0, 0, 0], bg: "#07080F", bloom: 0.4, bloomThreshold: 0.97, rim: "#FFD23D", envIntensity: 0.55, exposure: 0.9 });
+      // Warp: a long field of streaks rushing at the camera.
+      const warp = MO3D.particles(st, "field", { count: 2400, radius: 14, colors: ["#FFD23D", "#3DE1FF", "#ffffff"], size: 2.4, seed: 21 });
+      warp.scale.set(0.6, 0.6, 3);
+      MO3D.move(tl, warp, 0, { from: { z: -40 }, to: { z: 25 }, dur: D, ease: "power1.in" });
+      const bolt = new st.T.Group(); st.root.add(bolt);
+      MO3D.svg(st, "emoji-high-voltage", { size: 1.8, depth: 0.2, parent: bolt });
+      MO3D.move(tl, bolt, 0, { from: { x: 0, y: 1.0, z: -30, rz: 40, ry: -90 }, to: { x: 0, y: 0.95, z: 0, rz: 0, ry: 0 }, dur: 0.9, ease: "expo.out" });
+      MO3D.move(tl, bolt, 0.9, { from: { ry: 0 }, to: { ry: 35 }, dur: D - 0.9, ease: "sine.inOut" });
+      const tn = MO.atWord("s5", "430", { fallback: 1.2 });
+      MO.reveal(tl, "#s5-k", 0.2, { kind: "rise" });
+      MO.reveal(tl, ["#s5-n", "#s5-u"], 0.45, { kind: "slam", stagger: 0.1 });
+      MO.count(tl, "#s5-n", 0, 430, 0.45, { dur: Math.max(1.2, tn + 0.5 - 0.45) });
+      MO.reveal(tl, "#s5-b", MO.atWord("s5", "km/h", { fallback: 2.6, end: true }), { kind: "rise" });
+      MO.exit(tl, "#s5-scene", D, "deck", { overlap: true });
+      window.__timelines["s5"] = tl;
+    })();
+  </script>
+</template>

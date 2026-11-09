@@ -1,0 +1,39 @@
+<template>
+  <div id="root" data-composition-id="s7" data-width="1080" data-height="1920">
+    <div class="mo-scene" id="s7-scene">
+      <div class="mo-gl-host" id="s7-gl"></div>
+      <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 28%, rgba(255,61,139,.2), transparent 55%)"></div>
+      <div class="mo-stage" id="s7-stage">
+        <div class="mo-center" style="top:560px;max-width:720px;margin:0 auto">
+          <div class="mo-row" style="justify-content:center;flex-wrap:wrap;gap:14px" id="s7-chips">
+            <span class="mo-chip" style="font-size:44px">86 Md</span><span class="mo-chip" style="font-size:44px">1,4 kg</span><span class="mo-chip" style="font-size:44px">20 %</span><span class="mo-chip" style="font-size:44px">430 km/h</span><span class="mo-chip" style="font-size:44px">73 %</span>
+          </div>
+          <div class="mo-title" id="s7-t" style="margin-top:40px">Partage à quelqu'un</div>
+          <div class="mo-title mo-accent" id="s7-u">qui devrait s'en servir plus</div>
+          <div class="mo-btn" id="s7-btn" style="margin-top:32px;font-size:52px;padding:22px 52px">Envoie-lui ↗</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 5.4;
+      const tl = gsap.timeline({ paused: true });
+      MO.enter(tl, "#s7-scene", 0, "blur");
+      const st = MO3D.stage(tl, "#s7-gl", { D, cam: [0, 0, 10], look: [0, 0, 0], bg: "#07080F", bloom: 0.35, bloomThreshold: 0.97, rim: "#3DE1FF", envIntensity: 0.5, exposure: 0.9 });
+      MO3D.particles(st, "field", { count: 1000, radius: 7, colors: ["#FF3D8B", "#3DE1FF", "#ffffff"], size: 3, seed: 5 });
+      const brain = new st.T.Group(); st.root.add(brain);
+      MO3D.svg(st, "emoji-brain", { size: 1.15, depth: 0.16, parent: brain });
+      brain.position.set(0, 2.2, 0);
+      MO3D.spin(tl, brain, 0, { y: 1, dur: D, ease: "power1.inOut" });
+      MO3D.hover(st, brain, { amp: 0.06, rot: 3 });
+      MO.reveal(tl, "#s7-chips > *", 0.1, { kind: "pop", stagger: 0.07 });
+      MO.reveal(tl, "#s7-t", MO.atWord("s7", "Partage", { fallback: 0.6 }), { kind: "rise" });
+      MO.reveal(tl, "#s7-u", MO.atWord("s7", "devrait", { fallback: 1.4 }), { kind: "rise" });
+      const tb = MO.snap("s7", MO.atWord("s7", "plus", { fallback: 2.4, end: true }) + 0.1);
+      MO.reveal(tl, "#s7-btn", tb, { kind: "pop" });
+      MO.shine(tl, "#s7-btn", tb + 0.5);
+      window.__timelines["s7"] = tl;
+    })();
+  </script>
+</template>

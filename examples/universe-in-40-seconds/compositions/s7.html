@@ -1,0 +1,55 @@
+<template>
+  <div id="root" data-composition-id="s7" data-width="1920" data-height="1080">
+    <div class="mo-scene" id="s7-scene">
+      <div class="mo-gl-host" id="s7-gl"></div>
+      <div class="mo-stage" id="s7-stage">
+        <div class="mo-safe" style="top:150px">
+          <div class="mo-kicker" id="s7-k">The observable universe</div>
+        </div>
+        <div class="mo-safe" style="top:640px">
+          <div class="mo-stat" id="s7-n" style="font-size:210px;line-height:1;white-space:nowrap">93</div>
+          <div class="mo-title" id="s7-l" style="font-size:64px;margin-top:4px">light-years across</div>
+        </div>
+      </div>
+      <div class="mo-grain"></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 5.5;
+      const tl = gsap.timeline({ paused: true });
+      MO.enter(tl, "#s7-scene", 0, "back");
+      const st = MO3D.stage(tl, "#s7-gl", { D, cam: [0, 0, 2.5], look: [0, 0, 0], fov: 45, bg: "--bg", bloom: 0.55, bloomThreshold: 0.75 });
+      const T = st.T, r = MO.rng(77);
+      // Cosmic web: clusters joined by filaments, inside a sphere.
+      const R = 9, nodes = [];
+      for (let i = 0; i < 46; i++) { const u = r() * 2 - 1, th = r() * Math.PI * 2, d = Math.cbrt(r()) * R * 0.92, q = Math.sqrt(1 - u * u); nodes.push(new T.Vector3(q * Math.cos(th) * d, u * d, q * Math.sin(th) * d)); }
+      const pos = [], cols = [], A = MO3D.col("#FFE3B0"), B = MO3D.col("#7F8CFF"), C = MO3D.col("#C77DFF"), tmp = new T.Color();
+      const g = () => (r() + r() + r() - 1.5) * 0.5;
+      const push = (v, c) => { pos.push(v.x, v.y, v.z); cols.push(c.r, c.g, c.b); };
+      nodes.forEach((n, i) => {
+        for (let k = 0; k < 420; k++) push(n.clone().add(new T.Vector3(g(), g(), g()).multiplyScalar(0.55)), tmp.copy(A).lerp(C, r() * 0.4));
+        const near = nodes.map((m, j) => [m.distanceTo(n), j]).filter((x) => x[1] !== i).sort((a, b) => a[0] - b[0]).slice(0, 3);
+        near.forEach(([dist, j]) => { if (j < i) return; const m = nodes[j]; for (let k = 0; k < 260; k++) { const f = r(); push(n.clone().lerp(m, f).add(new T.Vector3(g(), g(), g()).multiplyScalar(0.22)), tmp.copy(B).lerp(C, r())); } });
+      });
+      const geo = new T.BufferGeometry();
+      geo.setAttribute("position", new T.Float32BufferAttribute(pos, 3));
+      geo.setAttribute("color", new T.Float32BufferAttribute(cols, 3));
+      const web = new T.Points(geo, new T.PointsMaterial({ size: 0.09, vertexColors: true, transparent: true, opacity: 0.75, depthWrite: false, blending: T.AdditiveBlending }));
+      const holder = new T.Group(); holder.add(web); st.root.add(holder);
+      holder.position.set(6.4, 0.6, 0);
+      const shell = MO3D.shape(st, "sphere", { size: R * 1.02, mat: new T.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }), parent: holder });
+      MO3D.glow(st, shell, { color: "#6F8CFF", size: 1.02, power: 3.2, intensity: 0.9 });
+      tl.fromTo(holder.rotation, { y: 0, x: 0.2 }, { y: 0.5, x: 0.32, duration: D, ease: "none" }, 0);
+      MO3D.cam(tl, st, 0, { pos: [0, 2, 30], look: [2.4, 0, 0], dur: 3.4, ease: "power2.inOut" });
+      MO3D.cam(tl, st, 3.4, { pos: [-0.5, 2.4, 31.5], dur: D - 3.4, ease: "none" });
+      MO.reveal(tl, "#s7-k", 0.6, { kind: "rise" });
+      const tn = MO.atWord("s7", "Ninety", { fallback: 2.0 });
+      MO.reveal(tl, "#s7-n", tn - 0.1, { kind: "slam" });
+      MO.count(tl, "#s7-n", 0, 93, tn - 0.1, { dur: 1.0, suffix: " billion", suffixClass: "mo-title mo-accent" });
+      MO.reveal(tl, "#s7-l", tn + 0.6, { kind: "rise" });
+      MO.exit(tl, "#s7-scene", D, "blur", { overlap: true });
+      window.__timelines["s7"] = tl;
+    })();
+  </script>
+</template>

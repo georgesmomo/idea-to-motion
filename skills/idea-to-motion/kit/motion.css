@@ -47,6 +47,8 @@ html, body { overflow: hidden; background: var(--bg); color: var(--text); font-f
 .mo-stage { position: absolute; inset: 0; transform-origin: 50% 50%; }
 .mo-camera { position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform-origin: 0 0; }
 .mo-scene::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 50; background: var(--overlay, none); }
+.mo-gl, .mo-gl-host { position: absolute; left: 0; top: 0; display: block; pointer-events: none; }
+.mo-gl-host { width: 100%; height: 100%; }
 /* Grain (seeded SVG noise, identical on every frame) */
 .mo-grain { position: absolute; inset: 0; pointer-events: none; z-index: 49; opacity: var(--grain, 0); mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 1.4 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E"); }

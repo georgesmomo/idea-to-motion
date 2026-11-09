@@ -1,0 +1,58 @@
+<template>
+  <div id="root" data-composition-id="s3" data-width="1920" data-height="1080">
+    <div class="mo-scene" id="s3-scene">
+      <div class="mo-gl-host" id="s3-gl"></div>
+      <div class="mo-stage" id="s3-stage">
+        <div class="mo-safe mo-col" style="top:0;bottom:0;justify-content:center;gap:0;width:880px">
+          <div class="mo-kicker" id="s3-k" style="color:var(--accent-2)">01 · Spatial sound</div>
+          <div class="mo-stat" id="s3-n" style="font-size:300px;font-weight:800;letter-spacing:-0.06em;line-height:1">0°</div>
+          <div class="mo-title" id="s3-t" style="font-weight:300">Fills the room.<br><span class="mo-muted">Not one corner.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = 4.76;
+      const tl = gsap.timeline({ paused: true });
+      // AURA orb: clear glass shell, a small violet light core with a fresnel halo, a teal swirl of light inside.
+      function auraOrb(st, R, o) {
+        o = o || {};
+        const T = st.T, g = new T.Group();
+        st.root.add(g);
+        MO3D.shape(st, "sphere", { size: R, mat: "glass", parent: g });
+        const cc = o.core || "#7C3AED";
+        const core = MO3D.shape(st, "sphere", { size: R * 0.26, mat: "neon", color: cc, glow: 0.9, parent: g });
+        MO3D.glow(st, core, { color: cc, size: 1.55, intensity: 0.7, power: 2.6 });
+        // Transparent layers inside the glass are drawn over it (transmission only sees opaque objects).
+        core.children.forEach((h) => { h.material.depthTest = false; h.renderOrder = 5; });
+        const swirl = new T.Group(); swirl.rotation.x = 0.55; g.add(swirl);
+        const sw = MO3D.particles(st, "galaxy", { count: 3000, radius: R * 0.8, colors: [cc, o.swirl || "--accent-2"], size: 2.2, arms: 2, twist: 2.2, parent: swirl });
+        sw.material.depthTest = false; sw.renderOrder = 6;
+        return { g, core, swirl };
+      }
+      MO.enter(tl, "#s3-scene", 0, "cube");
+      const st = MO3D.stage(tl, "#s3-gl", { D, cam: [0, 0.3, 9], look: [0, 0, 0], bg: "--bg", bloom: 0.5, bloomThreshold: 0.82, rim: "--accent-2" });
+      const T = st.T;
+      const A = auraOrb(st, 1.0);
+      A.g.position.set(3.4, 0, 0);
+      MO3D.spin(tl, A.swirl, 0, { y: 0.8, dur: D });
+      // Sound waves: flat rings facing the camera leave the orb on every beat, grow and fade.
+      const waves = new T.Group(); waves.position.copy(A.g.position); st.root.add(waves);
+      const b = MO.beat();
+      for (let i = 0; i < 7; i++) {
+        const r = MO3D.shape(st, "ring", { size: 1.12, mat: "neon", color: i % 2 ? "--accent" : "--accent-2", glow: 0.75, parent: waves });
+        r.scale.setScalar(0.001);
+        const t = MO.snap("s3", 0.4 + i * b);
+        MO3D.move(tl, r, t, { from: { s: 1, opacity: 1 }, to: { s: 2.1, opacity: 0 }, dur: Math.min(b * 2.4, D - t - 0.05), ease: "power2.out" });
+      }
+      MO3D.cam(tl, st, 0, { pos: [0.5, 0.5, 8.4], dur: D, ease: "power1.inOut" });
+      MO.reveal(tl, "#s3-k", 0.1, { kind: "blur" });
+      MO.reveal(tl, "#s3-n", 0.2, { kind: "blur" });
+      MO.count(tl, "#s3-n", 0, 360, 0.3, { suffix: "°", dur: 1.4 });
+      MO.reveal(tl, "#s3-t", MO.snap("s3", 1.9), { kind: "rise" });
+      MO.exit(tl, "#s3-scene", D, "deck", { overlap: true });
+      window.__timelines["s3"] = tl;
+    })();
+  </script>
+</template>

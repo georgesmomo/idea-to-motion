@@ -1,6 +1,6 @@
 ---
 name: idea-to-motion
-description: "Turns any idea, on any topic, into a finished motion-design video (MP4 with music, sound effects, optional voice-over and captions), rendered locally from HTML + GSAP with HyperFrames. One line (\"a 15 s promo for my bakery's new croissant\") or a full brief: if the brief is complete it generates directly, otherwise it asks up to 3 quick multiple-choice questions. It writes the story, picks one of 14 styles, animates with a studio motion kit (kinetic type, icons, charts, diagrams, mockups, camera moves), composes licence-free beat-synced music, checks its own frames and renders. Use for motion graphics, animated explainers, kinetic typography, launch and app videos, social ads, Reels / Shorts / TikTok, event promos, logo reveals, data stories, educational, celebration and brand videos, or \"fais-moi une vidéo motion design\". Not for live-action editing, talking heads, or AI-generated photos and footage."
+description: "Turns any idea, on any topic, into a finished motion-design video (MP4 with music, sound effects, optional voice-over and captions), with 3D (three.js) and cinematic transitions, rendered locally from HTML + GSAP with HyperFrames. One line (\"a 15 s promo for my bakery's new croissant\") or a full brief: if the brief is complete it generates directly, otherwise it asks up to 3 quick multiple-choice questions. It writes the story, picks one of 14 styles, animates with a studio motion kit (kinetic type, icons, charts, diagrams, mockups, camera moves), composes licence-free beat-synced music, checks its own frames and renders. Use for motion graphics, animated explainers, kinetic typography, launch and app videos, social ads, Reels / Shorts / TikTok, event promos, logo reveals, data stories, educational, celebration and brand videos, or \"fais-moi une vidéo motion design\". Not for live-action editing, talking heads, or AI-generated photos and footage."
 ---
 
 # idea-to-motion
@@ -124,6 +124,10 @@ For each scene, edit `compositions/sN.html` (a skeleton is there) with the MO ki
 - Every scene: `MO.drift` on `#sN-bg`, `MO.enter` (not scene 1), `MO.exit` / `MO.panel` /
   `MO.dive` at `D` (not the last scene, which holds). Scene 1 starts with `{ kind: "settle" }`
   (or any reveal at 0 that leaves the hook readable at frame 0). First reveal at 0–0.05 s.
+- Go for depth when it serves the idea: a 3D hero (MO3D: extruded logo or word, product-like
+  object, planet, 3D emoji) in the hook, the reveal or the end card, a camera that dollies or
+  orbits, and overlap transitions (`cube`, `deck`, `deep`, `back`, `blur`) between worlds
+  (kit.md "3D", "Overlapping scenes"). `"motionBlur": true` for fast, cinematic pieces.
 - Compose every scene from one of the layouts in craft.md (split, stack, full-bleed, grid,
   kinetic), with a hero visual of at least 35 % of the frame, and change layout, scale or
   position from one scene to the next (a recurring hero must not sit in the same spot

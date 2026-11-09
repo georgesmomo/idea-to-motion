@@ -1,0 +1,55 @@
+<template>
+  <div id="root" data-composition-id="s3" data-width="1920" data-height="1080">
+    <div class="mo-scene" id="s3-scene">
+      <div class="mo-gl-host" id="s3-gl"></div>
+      <div class="mo-stage" id="s3-stage">
+        <div class="mo-safe" style="left:auto;right:96px;top:150px;width:760px;text-align:right">
+          <div class="mo-kicker" id="s3-k">The Sun</div>
+          <div class="mo-stat" id="s3-n" style="font-size:230px;margin-top:6px;line-height:1">150</div>
+          <div class="mo-title" id="s3-u" style="margin-top:-6px">million km</div>
+          <div class="mo-body mo-muted" id="s3-l" style="margin-top:56px">The light you see left it</div>
+          <div class="mo-title mo-accent" id="s3-m" style="margin-top:6px">8 min 20 s ago</div>
+        </div>
+        <div id="s3-pin" class="u-pin"><span class="u-dot"></span></div>
+      </div>
+      <div class="mo-grain"></div>
+    </div>
+  </div>
+  <style>
+    .u-pin { position: absolute; width: 48px; height: 48px; }
+    .u-dot { position: absolute; left: 16px; top: 16px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 20px var(--accent); }
+  </style>
+  <script>
+    (function () {
+      const D = 7.2;
+      const tl = gsap.timeline({ paused: true });
+      MO.enter(tl, "#s3-scene", 0, "blur");
+      const st = MO3D.stage(tl, "#s3-gl", { D, cam: [0, 0, 17], look: [-1, 0, 0], fov: 38, bg: "--bg", bloom: 0.85, bloomThreshold: 0.72, key: "#FFE2B0", rim: "#6FB6FF" });
+      MO3D.particles(st, "stars", { count: 2600, seed: 8 });
+      const sun = MO3D.planet(st, "sun", { size: 5.2, seed: 3 });
+      sun.position.set(-9.8, -0.4, -4);
+      tl.fromTo(sun.userData.surface.rotation, { y: 0 }, { y: 0.25, duration: D, ease: "none" }, 0);
+      const earth = MO3D.planet(st, "earth", { size: 0.16, seed: 4, res: 256, clouds: false });
+      earth.position.set(2.2, -3.1, 2);
+      MO3D.label(st, earth, "#s3-pin", { offset: [0, 0, 0], dy: 0 });
+      // A photon leaves the Sun and reaches the Earth (the "8 minutes").
+      const photon = MO3D.shape(st, "sphere", { size: 0.07, mat: "neon", color: "#FFE6A8", glow: 4 });
+      const from = sun.position.clone().add(new st.T.Vector3(5.3, -0.5, 1.2)), to = earth.position.clone();
+      const pr = { p: 0 };
+      const tp = MO.atWord("s3", "light", { fallback: 3.2 });
+      tl.fromTo(pr, { p: 0 }, { p: 1, duration: 2.2, ease: "power1.inOut" }, tp);
+      st.frame(() => { photon.position.copy(from).lerp(to, pr.p); photon.visible = pr.p > 0.001 && pr.p < 0.999; });
+      MO3D.cam(tl, st, 0, { pos: [0.8, 0.3, 15.2], look: [-1.4, 0, 0], dur: D, ease: "power1.inOut" });
+      MO.reveal(tl, "#s3-k", 0.3, { kind: "rise" });
+      const tn = MO.atWord("s3", "hundred", { fallback: 1.1 });
+      MO.reveal(tl, "#s3-n", tn - 0.1, { kind: "slam" });
+      MO.count(tl, "#s3-n", 0, 150, tn - 0.1, { dur: 1.1 });
+      MO.reveal(tl, "#s3-u", tn + 0.35, { kind: "rise" });
+      MO.reveal(tl, "#s3-l", tp - 0.2, { kind: "rise" });
+      MO.reveal(tl, "#s3-m", MO.atWord("s3", "eight", { fallback: 4.6 }) - 0.05, { kind: "stamp" });
+      MO.reveal(tl, "#s3-pin", tp + 2.1, { kind: "pop" });
+      MO.exit(tl, "#s3-scene", D, "back", { overlap: true });
+      window.__timelines["s3"] = tl;
+    })();
+  </script>
+</template>

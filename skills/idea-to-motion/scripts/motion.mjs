@@ -46,6 +46,9 @@ const PINS = {
   "@dicebear/core": "9.4.3",
   "@dicebear/open-peeps": "9.4.2",
   "lottie-web": "5.13.0",
+  three: "0.187.0",
+  esbuild: "0.28.2",
+  fontkit: "2.0.4",
 };
 // Voice-over: sherpa-onnx 1.12.x (2.x dropped the espeak front end needed for French etc.).
 const VOICE_PINS = { "sherpa-onnx-node": "1.12.36" };
@@ -126,6 +129,11 @@ function readProject(d) {
     seen[s.id] = 1;
     if (typeof s.duration !== "number" || !(s.duration > 0)) die(`project.json: scene ${s.id} needs a numeric duration > 0 (got ${JSON.stringify(s.duration)})`);
     if (s.vo != null && typeof s.vo !== "string") die(`project.json: scene ${s.id} vo must be a string (the line spoken in this scene)`);
+    if (s.overlap != null) {
+      const prev = p.scenes[i - 1];
+      if (!prev || typeof s.overlap !== "number" || s.overlap < 0 || s.overlap >= Math.min(prev.duration, s.duration) / 2)
+        die(`project.json: scene ${s.id} overlap must be a number of seconds, less than half of this scene and of the previous one (not on s1)`);
+    }
   });
   if (p.fps != null && ![24, 25, 30, 50, 60].includes(p.fps)) die("project.json: fps must be 24, 25, 30, 50 or 60");
   if (p.sound != null && !["auto", "manual", "none"].includes(p.sound)) die('project.json: sound must be "auto", "manual" or "none"');
@@ -134,8 +142,14 @@ function readProject(d) {
   if (p.voice && typeof p.voice !== "object") die('project.json: voice must be null or { "voice": "<id>", "speed": 1 }');
   return p;
 }
-function totalDuration(p) { return +p.scenes.reduce((a, s) => a + s.duration, 0).toFixed(3); }
-function sceneStarts(p) { const o = {}; let t = 0; p.scenes.forEach((s) => { o[s.id] = +t.toFixed(3); t += s.duration; }); return o; }
+// "overlap" (seconds) starts a scene that much before the previous one ends: both are on screen
+// during the transition (the outgoing exit and the incoming enter play together).
+function sceneStarts(p) {
+  const o = {}; let t = 0;
+  p.scenes.forEach((s, i) => { if (i) t -= s.overlap || 0; o[s.id] = +t.toFixed(3); t += s.duration; });
+  return o;
+}
+function totalDuration(p) { const last = p.scenes[p.scenes.length - 1]; return +(sceneStarts(p)[last.id] + last.duration).toFixed(3); }
 
 // ---------- commands ----------
 
@@ -311,6 +325,107 @@ function embedFonts(d, p) {
   return [...new Set(out)].join("\n");
 }
 
+// ---------- 3D (MO3D) ----------
+// three.js and a few addons bundled once into one classic script (works from file:// and in the
+// render), the kit's 3D layer, and the style's fonts converted to three.js typeface outlines.
+function buildThreeKit(out) {
+  const req = tcRequire();
+  const entry = join(TC, "three-kit-entry.mjs");
+  writeFileSync(entry, `import * as T from "three";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
+import { Font } from "three/examples/jsm/loaders/FontLoader.js";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
+import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+window.THREE = Object.assign({}, T, { RoomEnvironment, TextGeometry, Font, RoundedBoxGeometry, SVGLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass, mergeVertices });
+`);
+  req("esbuild").buildSync({ entryPoints: [entry], bundle: true, format: "iife", minify: true, outfile: out, absWorkingDir: TC, logLevel: "error" });
+  // Deterministic by construction: three's ids come from a seeded generator, and its animation
+  // loop (unused: the timeline draws every frame) cannot start a wall-clock rAF loop.
+  const seeded = "var __moRand=(function(){var a=20261109;return function(){a=(a+0x6d2b79f5)|0;var t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};})();"
+    + "var __moNoFrame=function(){return 0;};\n";
+  writeFileSync(out, seeded + readFileSync(out, "utf8").replace(/Math\.random/g, "__moRand")
+    .replace(/(?:self|window|globalThis)\.requestAnimationFrame|\brequestAnimationFrame\b/g, "__moNoFrame")
+    .replace(/(?:self|window|globalThis)\.cancelAnimationFrame|\bcancelAnimationFrame\b/g, "__moNoFrame"));
+}
+const CHARS3D = (() => { let s = ""; for (let c = 32; c < 127; c++) s += String.fromCharCode(c); for (let c = 160; c < 256; c++) s += String.fromCharCode(c); return s + "€’‘“”–—…•→←↑↓★✓×÷≈≠≤≥∞Œœ"; })();
+// A static TrueType file of `family` for 3D outlines (Google Fonts serves static .ttf instances to
+// non-browser clients), heaviest weight unless `want` is given.
+function fontFileFor(family, want) {
+  mkdirSync(FONT_CACHE, { recursive: true });
+  const slug = family.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const order = want ? [want, 800, 700, 900, 600, 500, 400] : [900, 800, 700, 600, 500, 400];
+  for (const w of [...new Set(order)]) {
+    const file = join(FONT_CACHE, `3d-${slug}-${w}.ttf`);
+    if (existsSync(file)) return { file, weight: w };
+    const r = spawnSync("curl", ["-fsSL", "--retry", "2", `https://fonts.googleapis.com/css2?family=${family.replace(/ /g, "+")}:wght@${w}`], { encoding: "utf8" });
+    const url = r.status === 0 ? (/url\((https:[^)]+\.ttf)\)/.exec(r.stdout) || [])[1] : null;
+    if (url && curl(url, file)) return { file, weight: w };
+  }
+  return null;
+}
+function typeface(file, weight) {
+  const fontkit = tcRequire()("fontkit");
+  let font = fontkit.openSync(file);
+  if (font.variationAxes && font.variationAxes.wght && /\.ttf$/i.test(file)) {
+    const a = font.variationAxes.wght;
+    font = font.getVariation({ wght: Math.max(a.min, Math.min(a.max, weight)) });
+  }
+  const r = (v) => Math.round(v);
+  const glyphs = {};
+  for (const ch of CHARS3D) {
+    const cp = ch.codePointAt(0);
+    if (!font.hasGlyphForCodePoint(cp)) continue;
+    const g = font.glyphForCodePoint(cp);
+    const o = [];
+    for (const c of g.path.commands) {
+      const a = c.args;
+      if (c.command === "moveTo") o.push("m", r(a[0]), r(a[1]));
+      else if (c.command === "lineTo") o.push("l", r(a[0]), r(a[1]));
+      else if (c.command === "quadraticCurveTo") o.push("q", r(a[2]), r(a[3]), r(a[0]), r(a[1]));
+      else if (c.command === "bezierCurveTo") o.push("b", r(a[4]), r(a[5]), r(a[0]), r(a[1]), r(a[2]), r(a[3]));
+    }
+    const bb = g.bbox;
+    glyphs[ch] = { ha: r(g.advanceWidth), x_min: r(bb.minX), x_max: r(bb.maxX), o: o.join(" ") };
+  }
+  return { glyphs, familyName: font.familyName, ascender: font.ascent, descender: font.descent, underlinePosition: font.underlinePosition,
+    underlineThickness: font.underlineThickness || 50, boundingBox: { xMin: font.bbox.minX, yMin: font.bbox.minY, xMax: font.bbox.maxX, yMax: font.bbox.maxY },
+    resolution: font.unitsPerEm, original_font_information: { format: 0, fontFamily: font.familyName } };
+}
+function threeAssets(d, p) {
+  const dir = join(d, "compositions");
+  const uses = existsSync(dir) && readdirSync(dir).some((f) => f.endsWith(".html") && /\bMO3D\./.test(readFileSync(join(dir, f), "utf8")));
+  if (!uses) return false;
+  const bundle = join(TC, `three-kit-${PINS.three}-2.js`);
+  if (!existsSync(bundle)) {
+    if (!existsSync(join(TC, "node_modules", "three"))) die(`3D scenes need three.js in the toolchain. Run: node ${ME} setup`);
+    buildThreeKit(bundle);
+  }
+  const copyIfNew = (src, dst) => { if (!existsSync(dst) || readFileSync(src, "utf8") !== readFileSync(dst, "utf8")) copyFileSync(src, dst); };
+  copyIfNew(bundle, join(d, "assets", "vendor", "three-kit.js"));
+  copyIfNew(join(SKILL, "kit", "motion3d.js"), join(d, "assets", "mo", "motion3d.js"));
+  // 3D fonts: the style's display and body families (brand fonts win), heaviest weight.
+  const fams = fontFamilies(p.style), b = p.brand || {};
+  const want = { display: b.font3d || b.displayFont || fams[0], body: b.bodyFont || fams[1] || fams[0] };
+  const out = join(d, "assets", "mo", "fonts3d.js");
+  const key = JSON.stringify([want, CHARS3D.length, 2]);
+  if (existsSync(out) && readFileSync(out, "utf8").startsWith(`/* ${key} */`)) return true;
+  const data = {};
+  for (const [role, fam] of Object.entries(want)) {
+    const local = (b.fontFiles || {})[fam];
+    const f = local && existsSync(join(d, local)) ? { file: join(d, local), weight: 800 } : fontFileFor(fam, role === "body" ? 800 : null);
+    if (!f) { say(`  ⚠ 3D font "${fam}" not available (offline?): MO3D.text falls back to the other one`); continue; }
+    try { data[role] = typeface(f.file, f.weight); } catch (e) { say(`  ⚠ 3D font "${fam}" could not be converted: ${e.message}`); }
+  }
+  writeFileSync(out, `/* ${key} */\nwindow.MO_FONTS3D = ${JSON.stringify(data)};\n`);
+  return true;
+}
+
 function brandCss(p) {
   const b = p.brand;
   if (!b) return "";
@@ -326,8 +441,7 @@ function brandCss(p) {
 function sync(d) {
   const p = readProject(d);
   const [W, H] = RATIOS[p.ratio];
-  const total = totalDuration(p);
-  let start = 0;
+  const total = totalDuration(p), starts = sceneStarts(p);
   const hosts = p.scenes.map((s, idx) => {
     const file = join(d, "compositions", s.id + ".html");
     if (!existsSync(file)) { mkdirSync(join(d, "compositions"), { recursive: true }); writeFileSync(file, sceneSkeleton(s.id, W, H, s.duration, idx === 0, idx === p.scenes.length - 1)); }
@@ -339,13 +453,13 @@ function sync(d) {
       if (next !== src) writeFileSync(file, next);
     }
     const h = `      <div id="${s.id}" data-composition-id="${s.id}" data-composition-src="compositions/${s.id}.html"
-        data-start="${+start.toFixed(3)}" data-duration="${s.duration}" data-track-index="1" data-track-kind="graphics"
-        data-width="${W}" data-height="${H}"></div>`;
-    start += s.duration;
+        data-start="${starts[s.id]}" data-duration="${s.duration}" data-track-index="${1 + (idx % 2) * 2}" data-track-kind="graphics"
+        data-width="${W}" data-height="${H}" style="z-index:${idx + 1}"></div>`;
     return h;
   });
   for (const sub of ["compositions", "assets/vendor", "assets/mo", "assets/audio"]) mkdirSync(join(d, sub), { recursive: true });
   copyVendor(d);
+  const uses3d = threeAssets(d, p);
   // Lottie files the user supplied (assets/lottie/*.json): ship the player too.
   const hasLottie = existsSync(join(d, "assets", "lottie"));
   if (hasLottie && !existsSync(join(d, "assets", "vendor", "lottie_light.min.js"))) {
@@ -378,7 +492,7 @@ function sync(d) {
     <meta name="viewport" content="width=${W}, height=${H}" />
     <script src="assets/vendor/gsap.min.js"></script>${plugins}
     <script>gsap.registerPlugin(${GSAP_PLUGINS.filter((x) => x !== "SplitText").join(", ")});</script>
-    <script src="assets/mo/motion.js"></script>${hasLottie ? `\n    <script src="assets/vendor/lottie_light.min.js"></script>` : ""}${extra}
+    <script src="assets/mo/motion.js"></script>${uses3d ? `\n    <script src="assets/vendor/three-kit.js"></script>\n    <script src="assets/mo/fonts3d.js"></script>\n    <script src="assets/mo/motion3d.js"></script>` : ""}${hasLottie ? `\n    <script src="assets/vendor/lottie_light.min.js"></script>` : ""}${extra}
     <style>
 ${embedFonts(d, p)}
 ${cssFor(p.style)}
@@ -387,7 +501,7 @@ ${brandCss(p)}
     </style>
   </head>
   <body data-style="${p.style}" data-ratio="${p.ratio.replace(":", "x")}"${p.voice && p.scenes.some((s) => s.vo) && p.captions !== false ? " data-captions" : ""}>
-    <div id="root" data-composition-id="main" data-start="0" data-duration="${total}" data-fps="${p.fps || 30}" data-width="${W}" data-height="${H}">
+    <div id="root" data-composition-id="main" data-start="0" data-duration="${total}" data-fps="${p.fps || 30}" data-width="${W}" data-height="${H}"${p.motionBlur ? ` data-motion-blur="on"${typeof p.motionBlur === "number" ? ` data-motion-blur-shutter="${p.motionBlur}"` : ""}` : ""}>
 ${hosts.join("\n")}${audio}
     </div>
     <script>
@@ -408,6 +522,8 @@ function expected(f) {
   if (f.code === "container_overflow" && /-(bg|stage|cam|scene)\b/.test(where)) return true;
   if (f.code === "canvas_covered" && (/-(bg|scene)\b/.test(where) || /^#s\d+ > div:nth-of-type\(1\) > div:nth-of-type\(1\)$/.test(where))) return true;
   if (/mo-grain|mo-flash/.test(where)) return true;
+  // A 3D stage is a full-frame canvas: stars and floors reach the edges on purpose.
+  if (f.code === "canvas_content_at_edge" && /-gl\b/.test(where)) return true;
   // Voice-over captions follow the voice: their on-screen time is the speech, not a reading hold.
   if (f.code === "line_unread" && /-cap\b/.test(where)) return true;
   return false;
@@ -507,8 +623,8 @@ async function stills() {
   let p = sync(d);
   if (p.voice) { await voiceOver(d, p, true); p = sync(d); }
   // Frame 0 (the hook / thumbnail), one still per scene at 65 % of its length, plus any --at.
-  let s0 = 0; const ts = [0];
-  p.scenes.forEach((s) => { ts.push(+(s0 + s.duration * 0.65).toFixed(2)); s0 += s.duration; });
+  const ts = [0], st0 = sceneStarts(p);
+  p.scenes.forEach((s) => ts.push(+(st0[s.id] + s.duration * 0.65).toFixed(2)));
   const extra = opt("at", null);
   if (extra) extra.split(",").map(Number).filter((x) => !isNaN(x)).forEach((x) => ts.push(x));
   if (flag("only") && extra) ts.splice(0, ts.length, ...extra.split(",").map(Number));
@@ -545,7 +661,9 @@ function browserPath() {
 function harnessHead(d, p) {
   const idx = readFileSync(join(d, "index.html"), "utf8");
   const head = (/<head>([\s\S]*?)<\/head>/.exec(idx) || [])[1] || "";
-  return head;
+  // 3D stages build their scene but skip GPU drawing here (layout and cues only): software GL in
+  // this headless page would take seconds per frame.
+  return "<script>window.MO3D_HARNESS = true;</script>" + head;
 }
 // Each scene alone in a page with the same head as index.html (fonts, CSS, GSAP, kit), loaded
 // from the project folder so relative asset paths resolve.
@@ -565,6 +683,7 @@ async function withPage(d, p, fn) {
   try {
     const page = await browser.newPage();
     await page.setViewport({ width: W, height: H });
+    page.setDefaultNavigationTimeout(180000); page.setDefaultTimeout(180000); // 3D scenes build textures on load
     return await fn(page, harnessHead(d, p), W, H);
   } finally { await browser.close(); rmSync(join(d, ".motion-harness.html"), { force: true }); }
 }
@@ -575,7 +694,7 @@ async function safeAreaCheck(d, p) {
   let fontsOk = true;
   const fams = fontFamilies(p.style);
   await withPage(d, p, async (page, head, W, H) => {
-    let start = 0;
+    const starts = sceneStarts(p);
     for (const s of p.scenes) {
       await page.goto(sceneHarness(d, p, s, head, W, H), { waitUntil: "load" });
       const ok = await page.evaluate(async (fams) => {
@@ -586,14 +705,16 @@ async function safeAreaCheck(d, p) {
       if (!ok) fontsOk = false;
       // Fonts loaded after the scene script built its layout: rebuild with the right metrics.
       await page.goto(sceneHarness(d, p, s, head, W, H), { waitUntil: "load" });
-      const res = await page.evaluate((id, D, rail) => {
+      const idx = p.scenes.indexOf(s), oIn = s.overlap || 0, oOut = (p.scenes[idx + 1] || {}).overlap || 0;
+      const res = await page.evaluate((id, D, rail, oIn, oOut) => {
         const tl = window.__timelines && window.__timelines[id];
         if (!tl) return [];
         const cs = getComputedStyle(document.body);
         const n = (v) => parseFloat(cs.getPropertyValue(v)) || 0;
         const box = { l: n("--safe-l"), r: innerWidth - n("--safe-r"), t: n("--safe-t"), b: innerHeight - n("--safe-b") };
         const out = [];
-        const times = [0.35, 0.6, 0.85].map((f) => +(D * f).toFixed(2));
+        // Sampled outside the overlap windows (a scene turning in a cube transition is not a layout).
+        const times = [0.35, 0.6, 0.85].map((f) => +Math.min(Math.max(D * f, oIn + 0.05), D - oOut - 0.05).toFixed(2));
         if (id === "s1") times.unshift(0);
         for (const t of times) {
           tl.seek(t, false);
@@ -622,9 +743,8 @@ async function safeAreaCheck(d, p) {
         }
         const seen = {};
         return out.filter((x) => (seen[x.text] ? false : (seen[x.text] = true)));
-      }, s.id, s.duration, p.ratio === "9:16");
-      res.forEach((x) => found.push(`${s.id} @${(start + x.t).toFixed(2)}s "${x.text}" outside the safe area (${x.sides})`));
-      start += s.duration;
+      }, s.id, s.duration, p.ratio === "9:16", oIn, oOut);
+      res.forEach((x) => found.push(`${s.id} @${(starts[s.id] + x.t).toFixed(2)}s "${x.text}" outside the safe area (${x.sides})`));
     }
   });
   if (!fontsOk) say("  ⚠ safe-area check ran without web fonts (offline?): widths are approximate");
@@ -637,7 +757,7 @@ async function autoCues(d, p) {
   await withPage(d, p, async (page, head, W, H) => {
     const errors = [];
     page.on("pageerror", (e) => errors.push(String(e.message || e)));
-    let start = 0;
+    const starts = sceneStarts(p);
     for (const s of p.scenes) {
       errors.length = 0;
       await page.goto(sceneHarness(d, p, s, head, W, H), { waitUntil: "load" });
@@ -649,8 +769,7 @@ async function autoCues(d, p) {
       if (errors.length) problems.push(`${s.id}.html throws: ${errors[0]}`);
       else if (!info.tl) problems.push(`${s.id}.html does not register window.__timelines["${s.id}"]`);
       else if (info.dur > s.duration + 0.05) say(`  ⚠ ${s.id}: motion lasts ${info.dur.toFixed(2)} s but the scene is ${s.duration} s: the end is cut`);
-      info.cues.forEach((c) => { if (c.t < s.duration) out.push(Object.assign({}, c, { t: +(c.t + start).toFixed(3), scene: s.id })); });
-      start += s.duration;
+      info.cues.forEach((c) => { if (c.t < s.duration) out.push(Object.assign({}, c, { t: +(c.t + starts[s.id]).toFixed(3), scene: s.id })); });
     }
   });
   if (problems.length) { problems.forEach((m) => say("  ✗ " + m)); die("Fix the scene script(s) above before rendering."); }
@@ -823,12 +942,14 @@ function beats() {
   const total = totalDuration(p);
   const gr = beatGrid(m.mood, total, m.bpm);
   say(`${m.mood}: ${gr.bpm} bpm · beat ${gr.beat.toFixed(3)} s · bar ${gr.bar.toFixed(3)} s`);
-  let t = 0, tn = 0;
-  p.scenes.forEach((s) => {
+  const st = sceneStarts(p);
+  let tn = 0;
+  p.scenes.forEach((s, i) => {
     const half = gr.bar / 2;
     const snapped = +(Math.max(1, Math.round(s.duration / half)) * half).toFixed(3);
-    say(`  ${s.id}: now ${s.duration}s (starts ${t.toFixed(2)}s) → suggested ${snapped}s (${+(snapped / gr.bar).toFixed(1)} bars, starts ${tn.toFixed(2)}s)`);
-    t += s.duration; tn += snapped;
+    if (i) tn -= s.overlap || 0;
+    say(`  ${s.id}: now ${s.duration}s (starts ${st[s.id].toFixed(2)}s) → suggested ${snapped}s (${+(snapped / gr.bar).toFixed(1)} bars, starts ${tn.toFixed(2)}s)`);
+    tn += snapped;
   });
   say(`  total now ${total}s → suggested ${tn.toFixed(2)}s. With a voice-over, keep the lengths the voice needs.`);
   say("  Cuts on bar lines land on the downbeat. In scenes, MO.snap(\"sN\", t) moves a hit to the nearest beat.");
